@@ -84,6 +84,7 @@ module kappa3_light_core(input            clock,
                  .dbg_mode(dbg_mode),
                  .dbg_in(dbg_in),
                  .dbg_ld(dbg_pc_ld));
+   assign pc_in = pc_sel ? creg : (pc + 4);
    assign dbg_pc_out = pc;
 
    // IR
