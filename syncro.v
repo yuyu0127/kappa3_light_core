@@ -15,21 +15,21 @@
 // in:    入力
 // out:   出力
 module syncro(input  clock,
-	      input  reset,
-	      input  in,
-	      output out);
-   reg 		     q0, q1, q2;
+         input  reset,
+         input  in,
+         output out);
+   reg            q0, q1, q2;
 
    always @ ( posedge clock or negedge reset ) begin
       if ( !reset ) begin
-	 q0 <= 1'b0;
-	 q1 <= 1'b0;
-	 q2 <= 1'b0;
+    q0 <= 1'b0;
+    q1 <= 1'b0;
+    q2 <= 1'b0;
       end
       else begin
-	 q0 <= ~in; // プッシュボタンは負論理
-	 q1 <= q0;
-	 q2 <= q1;
+    q0 <= ~in; // プッシュボタンは負論理
+    q1 <= q0;
+    q2 <= q1;
       end
    end
 

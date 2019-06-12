@@ -27,17 +27,17 @@
 // dbg_in:   デバッグモードの入力
 // dbg_ld:   デバッグモードのロード信号
 module reg32(input             clock,
-	     input 	       reset,
+        input           reset,
 
-	     input [31:0]      in,
-	     input 	       ld,
+        input [31:0]      in,
+        input           ld,
 
-	     output reg [31:0] out,
+        output reg [31:0] out,
 
-	     // デバッグ関係
-	     input 	       dbg_mode,
-	     input [31:0]      dbg_in,
-	     input 	       dbg_ld);
+        // デバッグ関係
+        input           dbg_mode,
+        input [31:0]      dbg_in,
+        input           dbg_ld);
 
    always @ ( posedge clock or negedge reset )
      if ( !reset )

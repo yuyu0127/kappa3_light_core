@@ -62,48 +62,48 @@
 // seg7_f:     MU500-7SEGボードのFグループのセグメント(8ビット x 8個)
 // seg7_g:     MU500-7SEGボードのGグループのセグメント(8ビット x 8個)
 // seg7_h:     MU500-7SEGボードのHグループのセグメント(8ビット x 8個)
-module debugger(input         sys_clock,
-		input 	      reset,
-		input 	      clock,
-		input [31:0]  input_val,
-		input 	      button1,
-		input 	      button2,
-		input 	      button3,
-		output 	      run,
-		output 	      step_phase,
-		output 	      step_inst,
-		input [3:0]   cstate,
-		input 	      running,
-		input [3:0]   hex_a,
-		input [3:0]   hex_b,
-		input [7:0]   dip_a,
-		input [7:0]   dip_b,
-		input [31:0]  pc_out,
-		output 	      pc_ld,
-		input [31:0]  ir_out,
-		output 	      ir_ld,
-		input [31:0]  reg_out,
-		output [4:0]  reg_addr,
-		output 	      reg_ld,
-		input [31:0]  a_out,
-		output 	      a_ld,
-		input [31:0]  b_out,
-		output 	      b_ld,
-		input [31:0]  c_out,
-		output 	      c_ld,
-		output [31:0] mem_addr,
-		input [31:0]  mem_out,
-		output [31:0] mem_read,
-		output [31:0] mem_write,
-		output [63:0] seg7_a,
-		output [63:0] seg7_b,
-		output [63:0] seg7_c,
-		output [63:0] seg7_d,
-		output [63:0] seg7_e,
-		output [63:0] seg7_f,
-		output [63:0] seg7_g,
-		output [63:0] seg7_h,
-		output [7:0]  led_out);
+module debugger(input   sys_clock,
+      input             reset,
+      input             clock,
+      input [31:0]      input_val,
+      input             button1,
+      input             button2,
+      input             button3,
+      output            run,
+      output            step_phase,
+      output            step_inst,
+      input [3:0]       cstate,
+      input             running,
+      input [3:0]       hex_a,
+      input [3:0]       hex_b,
+      input [7:0]       dip_a,
+      input [7:0]       dip_b,
+      input [31:0]      pc_out,
+      output            pc_ld,
+      input [31:0]      ir_out,
+      output            ir_ld,
+      input [31:0]      reg_out,
+      output [4:0]      reg_addr,
+      output            reg_ld,
+      input [31:0]      a_out,
+      output            a_ld,
+      input [31:0]      b_out,
+      output            b_ld,
+      input [31:0]      c_out,
+      output            c_ld,
+      output [31:0]     mem_addr,
+      input [31:0]      mem_out,
+      output [31:0]     mem_read,
+      output [31:0]     mem_write,
+      output [63:0]     seg7_a,
+      output [63:0]     seg7_b,
+      output [63:0]     seg7_c,
+      output [63:0]     seg7_d,
+      output [63:0]     seg7_e,
+      output [63:0]     seg7_f,
+      output [63:0]     seg7_g,
+      output [63:0]     seg7_h,
+      output [7:0]      led_out);
 
    // 'P' のパタン
    parameter [7:0] PAT_P = 8'b1100_1110;
@@ -285,35 +285,35 @@ module debugger(input         sys_clock,
       parameter [7:0] SEG_E = 8'b1001_1110;
       parameter [7:0] SEG_F = 8'b1000_1110;
       case ( in )
-	4'h0: decode_func = SEG_0;
-	4'h1: decode_func = SEG_1;
-	4'h2: decode_func = SEG_2;
-	4'h3: decode_func = SEG_3;
-	4'h4: decode_func = SEG_4;
-	4'h5: decode_func = SEG_5;
-	4'h6: decode_func = SEG_6;
-	4'h7: decode_func = SEG_7;
-	4'h8: decode_func = SEG_8;
-	4'h9: decode_func = SEG_9;
-	4'hA: decode_func = SEG_A;
-	4'hB: decode_func = SEG_B;
-	4'hC: decode_func = SEG_C;
-	4'hD: decode_func = SEG_D;
-	4'hE: decode_func = SEG_E;
-	4'hF: decode_func = SEG_F;
+   4'h0: decode_func = SEG_0;
+   4'h1: decode_func = SEG_1;
+   4'h2: decode_func = SEG_2;
+   4'h3: decode_func = SEG_3;
+   4'h4: decode_func = SEG_4;
+   4'h5: decode_func = SEG_5;
+   4'h6: decode_func = SEG_6;
+   4'h7: decode_func = SEG_7;
+   4'h8: decode_func = SEG_8;
+   4'h9: decode_func = SEG_9;
+   4'hA: decode_func = SEG_A;
+   4'hB: decode_func = SEG_B;
+   4'hC: decode_func = SEG_C;
+   4'hD: decode_func = SEG_D;
+   4'hE: decode_func = SEG_E;
+   4'hF: decode_func = SEG_F;
       endcase
    endfunction // decode
 
    // 8桁のデコード関数
    function [63:0] decode8_func(input [31:0] in);
       decode8_func = {decode_func(in[31:28]),
-		      decode_func(in[27:24]),
-		      decode_func(in[23:20]),
-		      decode_func(in[19:16]),
-		      decode_func(in[15:12]),
-		      decode_func(in[11: 8]),
-		      decode_func(in[ 7: 4]),
-		      decode_func(in[ 3: 0])};
+            decode_func(in[27:24]),
+            decode_func(in[23:20]),
+            decode_func(in[19:16]),
+            decode_func(in[15:12]),
+            decode_func(in[11: 8]),
+            decode_func(in[ 7: 4]),
+            decode_func(in[ 3: 0])};
    endfunction // decode8_func
 
    // Aセグメント用の関数
@@ -323,45 +323,45 @@ module debugger(input         sys_clock,
 
    // Cセグメント用の関数
    function [63:0] c_func(input page,
-			  input [4:0] reg_addr);
+           input [4:0] reg_addr);
       if ( page == 1'b0 ) begin
-	 c_func = PAT_IR;
+    c_func = PAT_IR;
       end
       else begin
-	 case ( reg_addr )
-	   0: c_func = PAT_R00;
-	   1: c_func = PAT_R01;
-	   2: c_func = PAT_R02;
-	   3: c_func = PAT_R03;
-	   4: c_func = PAT_R04;
-	   5: c_func = PAT_R05;
-	   6: c_func = PAT_R06;
-	   7: c_func = PAT_R07;
-	   8: c_func = PAT_R08;
-	   9: c_func = PAT_R09;
-	  10: c_func = PAT_R10;
-	  11: c_func = PAT_R11;
-	  12: c_func = PAT_R12;
-	  13: c_func = PAT_R13;
-	  14: c_func = PAT_R14;
-	  15: c_func = PAT_R15;
-	  16: c_func = PAT_R16;
-	  17: c_func = PAT_R17;
-	  18: c_func = PAT_R18;
-	  19: c_func = PAT_R19;
-	  20: c_func = PAT_R20;
-	  21: c_func = PAT_R21;
-	  22: c_func = PAT_R22;
-	  23: c_func = PAT_R23;
-	  24: c_func = PAT_R24;
-	  25: c_func = PAT_R25;
-	  26: c_func = PAT_R26;
-	  27: c_func = PAT_R27;
-	  28: c_func = PAT_R28;
-	  29: c_func = PAT_R29;
-	  30: c_func = PAT_R30;
-	  31: c_func = PAT_R31;
-	 endcase
+    case ( reg_addr )
+      0: c_func = PAT_R00;
+      1: c_func = PAT_R01;
+      2: c_func = PAT_R02;
+      3: c_func = PAT_R03;
+      4: c_func = PAT_R04;
+      5: c_func = PAT_R05;
+      6: c_func = PAT_R06;
+      7: c_func = PAT_R07;
+      8: c_func = PAT_R08;
+      9: c_func = PAT_R09;
+     10: c_func = PAT_R10;
+     11: c_func = PAT_R11;
+     12: c_func = PAT_R12;
+     13: c_func = PAT_R13;
+     14: c_func = PAT_R14;
+     15: c_func = PAT_R15;
+     16: c_func = PAT_R16;
+     17: c_func = PAT_R17;
+     18: c_func = PAT_R18;
+     19: c_func = PAT_R19;
+     20: c_func = PAT_R20;
+     21: c_func = PAT_R21;
+     22: c_func = PAT_R22;
+     23: c_func = PAT_R23;
+     24: c_func = PAT_R24;
+     25: c_func = PAT_R25;
+     26: c_func = PAT_R26;
+     27: c_func = PAT_R27;
+     28: c_func = PAT_R28;
+     29: c_func = PAT_R29;
+     30: c_func = PAT_R30;
+     31: c_func = PAT_R31;
+    endcase
       end
    endfunction // c_func
 
@@ -377,34 +377,34 @@ module debugger(input         sys_clock,
 
    // Bセグメント用の関数
    function [63:0] b_func(input        page,
-			  input [31:0] in1,
-			  input [31:0] in2);
+                          input [31:0] in1,
+                          input [31:0] in2);
       b_func = decode8_func(page ? in2 : in1);
    endfunction // b_func
 
    // 各セグメントの点滅信号を作る．
    function [63:0] blink_func(input sel,
-			      input blink);
+               input blink);
       blink_func = {64{~sel | blink}};
    endfunction // blink_func
 
    // MAR
-   reg [31:0] 		    mar;
-   wire 		    mar_ld;
-   wire 		    mar_inc;
-   wire 		    mar_dec;
+   reg [31:0]     mar;
+   wire           mar_ld;
+   wire           mar_inc;
+   wire           mar_dec;
    always @ ( posedge clock or negedge reset ) begin
       if ( !reset ) begin
-	 mar <= 32'b0;
+    mar <= 32'b0;
       end
       else if ( mar_ld ) begin
-	 mar <= input_val;
+    mar <= input_val;
       end
       else if ( mar_inc ) begin
-	 mar <= mar + 32'd4;
+    mar <= mar + 32'd4;
       end
       else if ( mar_dec ) begin
-	 mar <= mar - 32'd4;
+    mar <= mar - 32'd4;
       end
    end
 
@@ -418,35 +418,35 @@ module debugger(input         sys_clock,
    // blink が 約 1.2 秒の間隔で点滅する．
    always @ ( posedge sys_clock or negedge reset ) begin
       if ( !reset ) begin
-	 seg7_blink_count <= 24'b0;
+    seg7_blink_count <= 24'b0;
       end
       else begin
-	 seg7_blink_count <= seg7_blink_count + 24'b1;
+    seg7_blink_count <= seg7_blink_count + 24'b1;
       end
    end
 
    assign reg_addr = {(hex_a == 4'b0111), hex_b};
 
    // 0: 1ページ目，1: 2ページ目
-   wire  			       page;
+   wire                  page;
    // PC が書き込み対象として選択されている．
-   wire 			       pc_sel;
+   wire                 pc_sel;
    // IR が書き込み対象として選択されている．
-   wire 			       ir_sel;
+   wire                 ir_sel;
    // Aレジスタが書き込み対象として選択されている．
-   wire 			       a_sel;
+   wire                 a_sel;
    // Bレジスタが書き込み対象として選択されている．
-   wire 			       b_sel;
+   wire                 b_sel;
    // Cレジスタが書き込み対象として選択されている．
-   wire 			       c_sel;
+   wire                 c_sel;
    // レジスタファイルが書き込み対象として選択されている．
-   wire 			       reg_sel;
+   wire                 reg_sel;
    // MARが書き込み対象として選択されている．
-   wire 			       mar_sel;
+   wire                 mar_sel;
    // メモリが書き込み対象として選択されている．
-   wire 			       mem_sel;
+   wire                 mem_sel;
    // 入力モード
-   wire 			       input_mode;
+   wire                 input_mode;
 
    assign page   = page_func(hex_a);
    assign pc_sel = (hex_a == 4'b0000);

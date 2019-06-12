@@ -16,23 +16,23 @@
 // clear:   クリア信号
 // out:     バッファの値
 module keybuf(input         clock,
-	      input 	    reset,
-	      input 	    key_in,
-	      input [3:0]   key_val,
-	      input 	    clear,
-	      output reg [31:0] out);
+         input        reset,
+         input        key_in,
+         input [3:0]   key_val,
+         input        clear,
+         output reg [31:0] out);
 
 
 always @(posedge clock)
 begin
-	if (clear) begin
-		out = 32'b0;
-	end
-	else begin
-		if (key_in) begin
-			out = (out << 4) + key_val;
-		end
-	end
+   if (clear) begin
+      out = 32'b0;
+   end
+   else begin
+      if (key_in) begin
+         out = (out << 4) + key_val;
+      end
+   end
 end
 
 endmodule // keyenc

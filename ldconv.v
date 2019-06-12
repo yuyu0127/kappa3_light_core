@@ -37,7 +37,7 @@ function [31:0] converter;
    input [31:0] in;
    input [31:0] ir;
    input [1:0]  offset;
-	
+   
    case (ir[14:12])
       000: converter = { { 24{ in[(offset<<3)+ 7] } }, in[(offset<<3)+ 7-: 8] }; // LB
       100: converter = {   24'b0                     , in[(offset<<3)+ 7-: 8] }; // LBU

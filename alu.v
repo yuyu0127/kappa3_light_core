@@ -13,10 +13,10 @@
 // in2:   入力２(32ビット)
 // ctl:   機能コード(4ビット)
 // out:   出力(32ビット)
-module alu(input [31:0]      in1,
-	   input [31:0]      in2,
-	   input [ 3:0]      ctl,
-	   output reg [31:0] out);
+module alu(input [31:0]    in1,
+      input [31:0]         in2,
+      input [ 3:0]         ctl,
+      output reg [31:0]    out);
 
    // ALU の機能コード
    parameter [3:0] ALU_LUI = 4'b0000;
@@ -36,27 +36,27 @@ module alu(input [31:0]      in1,
    parameter [3:0] ALU_SRA = 4'b1111;
 
    // 符号付き演算のための別名
-   wire signed [31:0] 	 sin1 = in1;
-   wire signed [31:0] 	 sin2 = in2;
+   wire signed [31:0]     sin1 = in1;
+   wire signed [31:0]     sin2 = in2;
 
    always @ ( * ) begin
       case ( ctl )
-	ALU_LUI: out = in2;
-	ALU_EQ:  out = (in1 == in2) ?  32'b1 : 32'b0;
-	ALU_NE:  out = (in1 == in2) ?  32'b0 : 32'b1;
-	ALU_LT:  out = (sin1 < sin2) ? 32'b1 : 32'b0;
-	ALU_GE:  out = (sin1 < sin2) ? 32'b0 : 32'b1;
-	ALU_LTU: out = (in1 < in2) ?   32'b1 : 32'b0;
-	ALU_GEU: out = (in1 < in2) ?   32'b0 : 32'b1;
-	ALU_ADD: out = sin1 + sin2;
-	ALU_SUB: out = sin1 - sin2;
-	ALU_XOR: out = in1 ^ in2;
-	ALU_OR:  out = in1 | in2;
-	ALU_AND: out = in1 & in2;
-	ALU_SLL: out = in1 << in2;
-	ALU_SRL: out = in1 >> in2;
-	ALU_SRA: out = sin1 >>> in2;
-	default: out = in2;
+   ALU_LUI: out = in2;
+   ALU_EQ:  out = (in1 == in2) ?  32'b1 : 32'b0;
+   ALU_NE:  out = (in1 == in2) ?  32'b0 : 32'b1;
+   ALU_LT:  out = (sin1 < sin2) ? 32'b1 : 32'b0;
+   ALU_GE:  out = (sin1 < sin2) ? 32'b0 : 32'b1;
+   ALU_LTU: out = (in1 < in2) ?   32'b1 : 32'b0;
+   ALU_GEU: out = (in1 < in2) ?   32'b0 : 32'b1;
+   ALU_ADD: out = sin1 + sin2;
+   ALU_SUB: out = sin1 - sin2;
+   ALU_XOR: out = in1 ^ in2;
+   ALU_OR:  out = in1 | in2;
+   ALU_AND: out = in1 & in2;
+   ALU_SLL: out = in1 << in2;
+   ALU_SRL: out = in1 >> in2;
+   ALU_SRA: out = sin1 >>> in2;
+   default: out = in2;
       endcase // case ( ctl )
    end
 endmodule // alu

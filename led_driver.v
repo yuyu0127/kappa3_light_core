@@ -65,118 +65,118 @@
 // なお出力の seg_a はボード上の7SEG-LEDのAグループ
 // とは全く無関係の8列ある7SEG-LEDの左端に対応している．
 module led_driver(input        sys_clock,
-		  input        reset,
-		  input [63:0] seg7_a,
-		  input [63:0] seg7_b,
-		  input [63:0] seg7_c,
-		  input [63:0] seg7_d,
-		  input [63:0] seg7_e,
-		  input [63:0] seg7_f,
-		  input [63:0] seg7_g,
-		  input [63:0] seg7_h,
-		  input [63:0] seg7_dot64,
-		  input [7:0]  rk_a,
-		  input [7:0]  rk_b,
-		  input [7:0]  rk_c,
-		  input [7:0]  rk_d,
-		  input [7:0]  rk_e,
-		  input [7:0]  rk_f,
-		  input [7:0]  rk_g,
-		  input [7:0]  rk_h,
-		  output [7:0] seg_a,
-		  output [7:0] seg_b,
-		  output [7:0] seg_c,
-		  output [7:0] seg_d,
-		  output [7:0] seg_e,
-		  output [7:0] seg_f,
-		  output [7:0] seg_g,
-		  output [7:0] seg_h,
-		  output [8:0] sel,
-		  output [7:0] seg_x,
-		  output [3:0] sel_x,
-		  output [7:0] seg_y,
-		  output [3:0] sel_y);
+        input        reset,
+        input [63:0] seg7_a,
+        input [63:0] seg7_b,
+        input [63:0] seg7_c,
+        input [63:0] seg7_d,
+        input [63:0] seg7_e,
+        input [63:0] seg7_f,
+        input [63:0] seg7_g,
+        input [63:0] seg7_h,
+        input [63:0] seg7_dot64,
+        input [7:0]  rk_a,
+        input [7:0]  rk_b,
+        input [7:0]  rk_c,
+        input [7:0]  rk_d,
+        input [7:0]  rk_e,
+        input [7:0]  rk_f,
+        input [7:0]  rk_g,
+        input [7:0]  rk_h,
+        output [7:0] seg_a,
+        output [7:0] seg_b,
+        output [7:0] seg_c,
+        output [7:0] seg_d,
+        output [7:0] seg_e,
+        output [7:0] seg_f,
+        output [7:0] seg_g,
+        output [7:0] seg_h,
+        output [8:0] sel,
+        output [7:0] seg_x,
+        output [3:0] sel_x,
+        output [7:0] seg_y,
+        output [3:0] sel_y);
 
    // 8つ+1のなかから１つの値を選ぶ(7SEG用)．
    function [63:0] select9(input [63:0] a,
-			    input [63:0] b,
-			    input [63:0] c,
-			    input [63:0] d,
-			    input [63:0] e,
-			    input [63:0] f,
-			    input [63:0] g,
-			    input [63:0] h,
-			    input [63:0] dot64,
-			    input [8:0]  state);
+             input [63:0] b,
+             input [63:0] c,
+             input [63:0] d,
+             input [63:0] e,
+             input [63:0] f,
+             input [63:0] g,
+             input [63:0] h,
+             input [63:0] dot64,
+             input [8:0]  state);
       // one-hot エンコーディングを仮定している
       if ( state[0] ) begin
-	 select9 = a;
+    select9 = a;
       end
       else if ( state[1] ) begin
-	 select9 = b;
+    select9 = b;
       end
       else if ( state[2] ) begin
-	 select9 = c;
+    select9 = c;
       end
       else if ( state[3] ) begin
-	 select9 = d;
+    select9 = d;
       end
       else if ( state[4] ) begin
-	 select9 = e;
+    select9 = e;
       end
       else if ( state[5] ) begin
-	 select9 = f;
+    select9 = f;
       end
       else if ( state[6] ) begin
-	 select9 = g;
+    select9 = g;
       end
       else if ( state[7] ) begin
-	 select9 = h;
+    select9 = h;
       end
       else if ( state[8] ) begin
-	 select9 = dot64;
+    select9 = dot64;
       end
       else begin
-	 // ありえないけど念の為
-	 select9 = 64'b0;
+    // ありえないけど念の為
+    select9 = 64'b0;
       end
    endfunction // select9
 
    // in_0, in_1, in_2, in_3 から選択する(RK用)．
    function [7:0] select4(input [7:0] in_0,
-			  input [7:0] in_1,
-			  input [7:0] in_2,
-			  input [7:0] in_3,
-			  input [3:0] state);
+           input [7:0] in_1,
+           input [7:0] in_2,
+           input [7:0] in_3,
+           input [3:0] state);
       // one-hot エンコーディングを仮定している
       if ( state[0] ) begin
-	 select4 = in_0;
+    select4 = in_0;
       end
       else if ( state[1] ) begin
-	 select4 = in_1;
+    select4 = in_1;
       end
       else if ( state[2] ) begin
-	 select4 = in_2;
+    select4 = in_2;
       end
       else if ( state[3] ) begin
-	 select4 = in_3;
+    select4 = in_3;
       end
       else begin
-	 // ありえないけど念の為
-	 select4 = 8'b0;
+    // ありえないけど念の為
+    select4 = 8'b0;
       end
    endfunction // select4
 
    // 時分割のタイミング調整用カウンタ
-   reg [15:0]			      count;
+   reg [15:0]               count;
 
    // 7SEG用の内部状態
    // 8個の7SEG-LEDグループ+1つのドットLEDグループで9個
-   reg [8:0] 			      seg7_state;
+   reg [8:0]                seg7_state;
 
    // RK用の内部状態
    // 4桁の7SEG-LEDを切り替える．
-   reg [3:0] 			      rk_state;
+   reg [3:0]                rk_state;
 
    // 時分割を行うためにセレクト信号を巡回させる．
    // 20Mhz を 2^16 = 64K分周する(約312Hz)．
@@ -187,21 +187,21 @@ module led_driver(input        sys_clock,
    // でローテート演算を記述している．
    always @ ( posedge sys_clock or negedge reset ) begin
       if ( !reset ) begin
-	 // 初期化する．
-	 // 実は count はどの値から始まっても正しく動く．
-	 // seg7_state, rk_state はどれか1つのビットだけ1の状態
-	 // から始めないと正しく動かない．
-	 count <= 16'b0;
-	 seg7_state <= 9'b0_0000_0001;
-	 rk_state <= 4'b0001;
+    // 初期化する．
+    // 実は count はどの値から始まっても正しく動く．
+    // seg7_state, rk_state はどれか1つのビットだけ1の状態
+    // から始めないと正しく動かない．
+    count <= 16'b0;
+    seg7_state <= 9'b0_0000_0001;
+    rk_state <= 4'b0001;
       end
       else begin
-	 count <= count + 16'b1;
-	 if ( count == 16'b0 ) begin
-	    // count が一周したタイミングでセレクト信号を更新する．
-	    seg7_state <= {seg7_state[7:0], seg7_state[8]};
-	    rk_state <= {rk_state[2:0], rk_state[3]};
-	 end
+    count <= count + 16'b1;
+    if ( count == 16'b0 ) begin
+       // count が一周したタイミングでセレクト信号を更新する．
+       seg7_state <= {seg7_state[7:0], seg7_state[8]};
+       rk_state <= {rk_state[2:0], rk_state[3]};
+    end
       end
    end
 
@@ -215,13 +215,13 @@ module led_driver(input        sys_clock,
 
    // seg7_state で選択されたデータ
    // 8個別々に書いてもいいけど連結すれば1つでまとめて記述できる．
-   wire [63:0] 			      data;
+   wire [63:0]                data;
    assign data = select9(seg7_a, seg7_b, seg7_c, seg7_d,
-			 seg7_e, seg7_f, seg7_g, seg7_h,
-			 seg7_dot64, seg7_state);
+          seg7_e, seg7_f, seg7_g, seg7_h,
+          seg7_dot64, seg7_state);
 
    assign {seg_a, seg_b, seg_c, seg_d,
-	   seg_e, seg_f, seg_g, seg_h} = data;
+      seg_e, seg_f, seg_g, seg_h} = data;
 
    // 選択信号は負論理
    // MU500-RKのLEDはダイナミック回路なので
