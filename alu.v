@@ -1,4 +1,3 @@
-
 // @file alu.v
 // @breif RISC-V 用 ALU モジュール
 // @author Yusuke Matsunaga (松永 裕介)

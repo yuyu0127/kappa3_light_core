@@ -1,4 +1,3 @@
-
 // @file memory.v
 // @breif メモリモジュール
 // @author Yusuke Matsunaga (松永 裕介)

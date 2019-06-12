@@ -1,4 +1,3 @@
-
 // @file kappa3_light_core_dp.v
 // @breif KAPPA3-LIGHT のデータパス
 // @author Yusuke Matsunaga (松永 裕介)

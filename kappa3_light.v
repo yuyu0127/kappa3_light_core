@@ -1,4 +1,3 @@
-
 // @file kappa3_light.v
 // @brief KAPPA3-LIGHTのトップモジュール
 // @author Yusuke Matsunaga (松永 裕介)

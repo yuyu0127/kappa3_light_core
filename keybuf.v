@@ -1,4 +1,3 @@
-
 // @file keybuf.v
 // @brief キー入力バッファ
 // @author Yusuke Matsunaga (松永 裕介)

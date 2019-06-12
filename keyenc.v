@@ -1,4 +1,3 @@
-
 // @file keyenc.v
 // @brief キー入力用のエンコーダ
 // @author Yusuke Matsunaga (松永 裕介)

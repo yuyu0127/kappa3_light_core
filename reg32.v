@@ -1,4 +1,3 @@
-
 // @file reg32.v
 // @breif 汎用32ビットレジスタ
 // @author Yusuke Matsunaga (松永 裕介)

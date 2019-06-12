@@ -1,4 +1,3 @@
-
 // @file phasegen.v
 // @breif フェーズジェネレータ
 // @author Yusuke Matsunaga (松永 裕介)

@@ -1,4 +1,3 @@
-
 // @file led_driver.v
 // @breif MU500-RX,RK,7SEGセット用表示モジュール
 // @author Yusuke Matsunaga (松永 裕介)

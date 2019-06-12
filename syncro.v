@@ -1,4 +1,3 @@
-
 // @file syncro.v
 // @brief シンクロナイザ
 // @author Yusuke Matsunaga (松永 裕介)

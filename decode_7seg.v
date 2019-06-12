@@ -1,4 +1,3 @@
-
 // @file decode_7seg.v
 // @breif 7SEG-LED のデコーダ回路
 // @author Yusuke Matsunaga (松永 裕介)
