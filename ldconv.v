@@ -27,9 +27,9 @@
 // ir:     IRレジスタの値
 // offset: アドレスオフセット
 // out:    出力(32ビット)
-module ldconv(input [31:0]      in,
-              input [31:0]      ir,
-              input [1:0]       offset,
+module ldconv(input [31:0]  in,
+              input [31:0]  ir,
+              input [1:0]   offset,
               output [31:0] out);
               
 

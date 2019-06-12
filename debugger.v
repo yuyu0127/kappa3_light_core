@@ -483,7 +483,7 @@ module debugger(input   sys_clock,
    assign mar_ld     =  input_mode & button3 & mar_sel;
    assign mar_inc    =  input_mode & button1;
    assign mar_dec    =  input_mode & button2;
-   assign mem_addr   = mar;
+   assign mem_addr   =  mar;
    assign mem_write  =  input_mode & button3 & mem_sel;
    assign mem_read   =  input_mode & ~button3 & mem_sel;
 

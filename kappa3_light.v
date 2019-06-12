@@ -209,97 +209,97 @@ module kappa3_light(input        sys_clock,
    assign rk_h = dec_out0;
 
    // KAPPA3-LIGHTのコア
-   wire  run;
-   wire  step_phase;
-   wire  step_inst;
+   wire        run;
+   wire        step_phase;
+   wire        step_inst;
    wire [3:0]  cstate;
-   wire  running;
+   wire        running;
    wire [31:0] pc_out;
-   wire  pc_ld;
+   wire        pc_ld;
    wire [31:0] ir_out;
-   wire  ir_ld;
+   wire        ir_ld;
    wire [31:0] a_out;
-   wire  a_ld;
+   wire        a_ld;
    wire [31:0] b_out;
-   wire  b_ld;
+   wire        b_ld;
    wire [31:0] c_out;
-   wire  c_ld;
+   wire        c_ld;
    wire [4:0]  reg_addr;
-   wire  reg_ld;
+   wire        reg_ld;
    wire [31:0] reg_out;
    wire [31:0] mem_addr;
-   wire  mem_read;
-   wire  mem_write;
+   wire        mem_read;
+   wire        mem_write;
    wire [31:0] mem_rddata;
    kappa3_light_core kapp3_light_core(.reset(reset),
-          .clock(clock),
-          .clock2(clock2),
-          .run(run),
-          .step_phase(step_phase),
-          .step_inst(step_inst),
-          .cstate(cstate),
-          .running(running),
-          .dbg_in(dbg_in),
-          .dbg_pc_ld(pc_ld),
-          .dbg_pc_out(pc_out),
-          .dbg_ir_ld(ir_ld),
-          .dbg_ir_out(ir_out),
-          .dbg_reg_addr(reg_addr),
-          .dbg_reg_ld(reg_ld),
-          .dbg_reg_out(reg_out),
-          .dbg_a_ld(a_ld),
-          .dbg_a_out(a_out),
-          .dbg_b_ld(b_ld),
-          .dbg_b_out(b_out),
-          .dbg_c_ld(c_ld),
-          .dbg_c_out(c_out),
-          .dbg_mem_addr(mem_addr),
-          .dbg_mem_read(mem_read),
-          .dbg_mem_write(mem_write),
-          .dbg_mem_out(mem_rddata));
+                                      .clock(clock),
+                                      .clock2(clock2),
+                                      .run(run),
+                                      .step_phase(step_phase),
+                                      .step_inst(step_inst),
+                                      .cstate(cstate),
+                                      .running(running),
+                                      .dbg_in(dbg_in),
+                                      .dbg_pc_ld(pc_ld),
+                                      .dbg_pc_out(pc_out),
+                                      .dbg_ir_ld(ir_ld),
+                                      .dbg_ir_out(ir_out),
+                                      .dbg_reg_addr(reg_addr),
+                                      .dbg_reg_ld(reg_ld),
+                                      .dbg_reg_out(reg_out),
+                                      .dbg_a_ld(a_ld),
+                                      .dbg_a_out(a_out),
+                                      .dbg_b_ld(b_ld),
+                                      .dbg_b_out(b_out),
+                                      .dbg_c_ld(c_ld),
+                                      .dbg_c_out(c_out),
+                                      .dbg_mem_addr(mem_addr),
+                                      .dbg_mem_read(mem_read),
+                                      .dbg_mem_write(mem_write),
+                                      .dbg_mem_out(mem_rddata));
 
    // デバッガ
    debugger dbg_inst(.sys_clock(sys_clock),
-   .reset(reset),
-   .clock(clock2),
-   .input_val(dbg_in),
-   .button1(button1),
-   .button2(button2),
-   .button3(button3),
-   .run(run),
-   .step_phase(step_phase),
-   .step_inst(step_inst),
-   .cstate(cstate),
-   .running(running),
-   .hex_a(hex_a),
-   .hex_b(hex_b),
-   .dip_a(dip_a),
-   .dip_b(dip_b),
-   .pc_out(pc_out),
-   .pc_ld(pc_ld),
-   .ir_out(ir_out),
-   .ir_ld(ir_ld),
-   .reg_out(reg_out),
-   .reg_addr(reg_addr),
-   .reg_ld(reg_ld),
-   .a_out(a_out),
-   .a_ld(a_ld),
-   .b_out(b_out),
-   .b_ld(b_ld),
-   .c_out(c_out),
-   .c_ld(c_ld),
-   .mem_addr(mem_addr),
-   .mem_out(mem_rddata),
-   .mem_read(mem_read),
-   .mem_write(mem_write),
-   .seg7_a(seg7_a),
-   .seg7_b(seg7_b),
-   .seg7_c(seg7_c),
-   .seg7_d(seg7_d),
-   .seg7_e(seg7_e),
-   .seg7_f(seg7_f),
-   .seg7_g(seg7_g),
-   .seg7_h(seg7_h),
-   .led_out(led_out));
+                     .reset(reset),
+                     .clock(clock2),
+                     .input_val(dbg_in),
+                     .button1(button1),
+                     .button2(button2),
+                     .button3(button3),
+                     .run(run),
+                     .step_phase(step_phase),
+                     .step_inst(step_inst),
+                     .cstate(cstate),
+                     .running(running),
+                     .hex_a(hex_a),
+                     .hex_b(hex_b),
+                     .dip_a(dip_a),
+                     .dip_b(dip_b),
+                     .pc_out(pc_out),
+                     .pc_ld(pc_ld),
+                     .ir_out(ir_out),
+                     .ir_ld(ir_ld),
+                     .reg_out(reg_out),
+                     .reg_addr(reg_addr),
+                     .reg_ld(reg_ld),
+                     .a_out(a_out),
+                     .a_ld(a_ld),
+                     .b_out(b_out),
+                     .b_ld(b_ld),
+                     .c_out(c_out),
+                     .c_ld(c_ld),
+                     .mem_addr(mem_addr),
+                     .mem_out(mem_rddata),
+                     .mem_read(mem_read),
+                     .mem_write(mem_write),
+                     .seg7_a(seg7_a),
+                     .seg7_b(seg7_b),
+                     .seg7_c(seg7_c),
+                     .seg7_d(seg7_d),
+                     .seg7_e(seg7_e),
+                     .seg7_f(seg7_f),
+                     .seg7_g(seg7_g),
+                     .seg7_h(seg7_h),
+                     .led_out(led_out));
 
 endmodule

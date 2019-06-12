@@ -23,9 +23,9 @@
 // in:     入力(32ビット)
 // ir:     IRレジスタの値
 // out:    出力(32ビット)
-module stconv(input [31:0]      in,
-              input [31:0]      ir,
-              output [31:0] out);
+module stconv(input [31:0]    in,
+              input [31:0]    ir,
+              output [31:0]   out);
 
 
 function [31:0] converter;

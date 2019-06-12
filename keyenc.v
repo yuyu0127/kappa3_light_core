@@ -13,8 +13,8 @@
 // key_in: いずれかのキーが押された時に1となる出力
 // key_val: キーの値(0 - 15)
 module keyenc(input [15:0] keys,
-         output       key_in,
-         output [3:0] key_val);
+              output       key_in,
+              output [3:0] key_val);
          
 function [3:0] encoder;
 input [15:0] f_in;
