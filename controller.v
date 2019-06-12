@@ -60,4 +60,126 @@ module controller(input [3:0]    cstate,
                   output [3:0]   alu_ctl,
                   output         c_ld);
 
+                  
+parameter IF = 4'b0001;
+parameter DE = 4'b0010;
+parameter EX = 4'b0100;
+parameter WB = 4'b1000;
+
+
+wire [6:0] opcode = ir[6:0];
+
+
+function f_pc_sel(input f);
+   if ( cstate == IF )
+      f_pc_sel = 0;
+   else if (
+      ( cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111) ) ||
+      ( cstate == WB && opcode == 7'b1100011 && alu_out == 32'b1 )
+   )
+      f_pc_sel = 1;
+endfunction
+
+
+function f_pc_ld(input f);
+   if (
+      ( cstate == IF ) || 
+      ( cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111) ) || 
+      ( cstate == WB && opcode == 7'b1100011 && alu_out == 32'b1 )
+   )
+      f_pc_ld = 1;
+   else
+      f_pc_ld = 0;
+endfunction
+
+
+function f_mem_sel(input f);
+   if ( cstate == IF )
+      f_mem_sel = 0;
+   else if ( cstate == WB && (opcode == 7'b0000011 || opcode == 7'b0100011) )
+      f_mem_sel = 1;
+endfunction
+
+
+function f_mem_wrbits(input f);
+   case (ir[14:12])
+      000: begin // SB
+         case (addr[1:0])
+            2'b00: f_mem_wrbits = 4'b0001;
+            2'b01: f_mem_wrbits = 4'b0010;
+            2'b10: f_mem_wrbits = 4'b0100;
+            2'b11: f_mem_wrbits = 4'b1000;
+         endcase
+      end
+      001: begin // SH
+         case (addr[1])
+            1'b0: f_mem_wrbits = 4'b0011;
+            1'b1: f_mem_wrbits = 4'b1100; 
+         endcase
+      end
+      default: begin // SWその他
+         f_mem_wrbits = 4'b1111;
+      end
+   endcase
+endfunction
+
+
+function f_rd_sel(input f);
+   if (cstate == WB) begin
+      if (opcode == 7'b0010011 || opcode == 7'b0110011)
+         f_rd_sel = 2; // 演算命令     -> C
+      if (opcode == 7'b0110111 || opcode == 7'b0000011)
+         f_rd_sel = 0; // ロード命令   -> メモリ
+      if (opcode == 7'b1100011)
+         f_rd_sel = 1; // ジャンプ命令 -> PC
+   end
+endfunction
+
+
+function f_rd_ld(input f);
+   if (cstate == WB) begin
+      if (
+         opcode == 7'b0010011 || 
+         opcode == 7'b0110011 || 
+         opcode == 7'b0110111 ||
+         opcode == 7'b0000011 ||
+         opcode == 7'b1100011
+      )
+         f_rd_ld = 1; 
+  end
+endfunction
+
+
+function f_alu_ctl(input f);
+   if (cstate == EX) begin
+      f_alu_ctl = 0;
+   end
+endfunction
+
+
+function f_imm(input f);
+   f_imm = 0;
+endfunction
+
+
+assign pc_sel        = f_pc_sel(0);
+assign pc_ld         = f_pc_ld(0);
+assign mem_sel       = f_mem_sel(0);
+assign mem_read      = (cstate == WB && opcode == 7'b0000011);
+assign mem_write     = (cstate == WB && opcode == 7'b0100011);
+assign mem_wrbits    = f_mem_wrbits(0);
+assign ir_ld         = (cstate == IF);
+assign rs1_addr      = ir[19:15];
+assign rs2_addr      = ir[24:20];
+assign rd_addr       = ir[11:7];
+assign rd_sel        = f_rd_sel(0);
+assign rd_ld         = f_rd_ld(0);
+assign a_ld          = (cstate == DE);
+assign b_ld          = (cstate == DE);
+assign a_sel         = 0;
+assign b_sel         = 0;
+assign imm           = f_imm(0);
+assign alu_ctl       = 0;
+assign c_ld          = (cstate == EX);
+
 endmodule // controller

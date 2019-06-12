@@ -168,43 +168,56 @@ module kappa3_light_core(input            clock,
                    .dbg_ld(dbg_b_ld));
    assign dbg_b_out = breg;
 
-   // ALU
-   wire [31:0]    alu_out;      // ALU の出力
-   // 実際にはここに alu のインスタンス記述が入る．
+   wire [31:0]    alu_in1;    // ALU の入力1
+   wire [31:0]    alu_in2;    // ALU の入力2
+   wire [ 3:0]    alu_ctl;
+   wire [31:0]    alu_out;    // ALU の出力
+   assign alu_in1 = (a_sel ? pc_in : areg);
+   assign alu_in2 = (b_sel ? imm : breg);
+
+   alu alu_inst(.in1(alu_in1),
+                .in2(alu_in2),
+                .ctl(alu_ctl),
+                .out(alu_out));
 
    // C-reg
    wire           c_ld;         // C-reg の書込みイネーブル信号
    wire [31:0]    creg;         // C-reg の値
-   reg32 creg_inst(.clock(clock2),
-                   .reset(reset),
-                   .in(alu_out),
-                   .ld(c_ld),
-                   .out(creg),
-                   .dbg_mode(dbg_mode),
-                   .dbg_in(dbg_in),
-                   .dbg_ld(dbg_c_ld));
    assign dbg_c_out = creg;
 
-   // 制御信号はすべて0にしておく．
-   assign pc_in = 32'b0;
-   assign pc_ld = 1'b0;
-   assign ir_in = 32'b0;
-   assign ir_ld = 1'b0;
-   assign mem_addr = 32'b0;
-   assign mem_write = 1'b0;
-   assign mem_wrdata = 32'b0;
-   assign mem_wrbits = 4'b0;
-   assign rs1_addr = 5'b0;
-   assign rs2_addr = 5'b0;
-   assign rd_addr = 5'b0;
-   assign rd_in = 32'b0;
-   assign rd_ld = 1'b0;
-   assign a_ld = 1'b0;
-   assign b_ld = 1'b0;
-   assign alu_out = 32'b0;
-   assign c_ld = 1'b0;
+   // Controller
+   wire           pc_sel;
+   wire           mem_sel;
+   wire           mem_read;
+   wire [1:0]     rd_sel;
+   wire           a_sel;
+   wire           b_sel;
+   wire [31:0]    imm;
 
-   // running は実際には phasegen の出力を用いる．
+   controller controller_inst(.cstate(cstate),
+                              .ir(ir),
+                              .addr(address),
+                              .alu_out(alu_out),
+                              .pc_sel(pc_sel),
+                              .pc_ld(pc_ld),
+                              .mem_sel(mem_sel),
+                              .mem_read(mem_read),
+                              .mem_write(mem_write),
+                              .mem_wrbits(mem_wrbits),
+                              .ir_ld(ir_ld),
+                              .rs1_addr(rs1_addr),
+                              .rs2_addr(rs2_addr),
+                              .rd_addr(rd_addr),
+                              .rd_sel(rd_sel),
+                              .rd_ld(rd_ld),
+                              .a_ld(a_ld),
+                              .b_ld(b_ld),
+                              .a_sel(a_sel),
+                              .b_sel(b_sel),
+                              .imm(imm),
+                              .alu_ctl(alu_ctl),
+                              .c_ld(c_ld));
+
    phasegen phasegen_inst(.clock(clock2), 
                           .reset(reset),
                           .run(run), .step_phase(step_phase),
