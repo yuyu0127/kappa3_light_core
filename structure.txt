@@ -1,4 +1,4 @@
-[PC(reg32)]
+o[PC(reg32)]
 in			<- case(@PC_SEL)
 				0: pc_out + 4
 				1: c_out
@@ -36,7 +36,7 @@ offset		<- case(@MEM_SEL)
 -> ldconv_out
 
 
-[IR(reg32)]
+o[IR(reg32)]
 in			<- rddata
 ld			<- @IR_LD
 
