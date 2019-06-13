@@ -15,12 +15,12 @@
 // key_val: キーの値(0 - 15)
 // clear:   クリア信号
 // out:     バッファの値
-module keybuf(input        clock,
-         input             reset,
-         input             key_in,
-         input [3:0]       key_val,
-         input             clear,
-         output reg [31:0] out);
+module keybuf(input              clock,
+              input              reset,
+              input              key_in,
+              input [3:0]        key_val,
+              input              clear,
+              output reg [31:0]  out);
 
 
 always @(posedge clock)

@@ -68,6 +68,8 @@ parameter WB = 4'b1000;
 
 
 wire [6:0] opcode = ir[6:0];
+wire [2:0] funct3 = ir[14:12];
+wire [6:0] funct7 = ir[31:25];
 
 
 function f_pc_sel(input f);
@@ -101,7 +103,7 @@ function f_mem_sel(input f);
 endfunction
 
 
-function f_mem_wrbits(input f);
+function [3:0] f_mem_wrbits(input f);
    case (ir[14:12])
       000: begin // SB
          case (addr[1:0])
@@ -149,37 +151,55 @@ function f_rd_ld(input f);
   end
 endfunction
 
-
-function f_alu_ctl(input f);
-   if (cstate == EX) begin
-      f_alu_ctl = 0;
-   end
+function [31:0] expand(input [11:0] in);
+   expand = { { 20{ in[11] } }, in[11:0] };
 endfunction
 
-
-function f_imm(input f);
+function [31:0]  f_imm(input f);
    f_imm = 0;
 endfunction
 
 
-assign pc_sel        = f_pc_sel(0);
-assign pc_ld         = f_pc_ld(0);
-assign mem_sel       = f_mem_sel(0);
-assign mem_read      = (cstate == WB && opcode == 7'b0000011);
-assign mem_write     = (cstate == WB && opcode == 7'b0100011);
-assign mem_wrbits    = f_mem_wrbits(0);
-assign ir_ld         = (cstate == IF);
-assign rs1_addr      = ir[19:15];
-assign rs2_addr      = ir[24:20];
-assign rd_addr       = ir[11:7];
-assign rd_sel        = f_rd_sel(0);
-assign rd_ld         = f_rd_ld(0);
-assign a_ld          = (cstate == DE);
-assign b_ld          = (cstate == DE);
-assign a_sel         = 0;
-assign b_sel         = 0;
-assign imm           = f_imm(0);
-assign alu_ctl       = 0;
-assign c_ld          = (cstate == EX);
+function [3:0]  f_alu_ctl(input f);
+   if (cstate == EX) begin
+      if      (opcode == 7'b0110111                                            ) f_alu_ctl = 4'b0000; // LUI
+      else if (opcode == 7'b1100011 && funct3 == 3'b000                        ) f_alu_ctl = 4'b0010; // BEQ
+      else if (opcode == 7'b1100011 && funct3 == 3'b100                        ) f_alu_ctl = 4'b0011; // BLT
+      else if (opcode == 7'b0110011 && funct3 == 3'b010                        ) f_alu_ctl = 4'b0011; // SLT
+      else if (opcode == 7'b1100011 && funct3 == 3'b101                        ) f_alu_ctl = 4'b0100; // BGE
+      else if (opcode == 7'b1100011 && funct3 == 3'b110                        ) f_alu_ctl = 4'b0101; // BLTU
+      else if (opcode == 7'b0110011 && funct3 == 3'b011                        ) f_alu_ctl = 4'b0101; // SLTU
+      else if (opcode == 7'b1100011 && funct3 == 3'b111                        ) f_alu_ctl = 4'b0110; // BGEU
+      else if (opcode == 7'b0110011 && funct3 == 3'b000 && funct7 == 7'b0000000) f_alu_ctl = 4'b1000; // ADD
+      else if (opcode == 7'b0110011 && funct3 == 3'b000 && funct7 == 7'b0100000) f_alu_ctl = 4'b1001; // SUB
+      else if (opcode == 7'b0110011 && funct3 == 3'b100                        ) f_alu_ctl = 4'b1010; // XOR
+      else if (opcode == 7'b0110011 && funct3 == 3'b110                        ) f_alu_ctl = 4'b1011; // OR
+      else if (opcode == 7'b0110011 && funct3 == 3'b111                        ) f_alu_ctl = 4'b1100; // AND
+      else if (opcode == 7'b0110011 && funct3 == 3'b001                        ) f_alu_ctl = 4'b1101; // SLL
+      else if (opcode == 7'b0110011 && funct3 == 3'b101 && funct7 == 7'b0000000) f_alu_ctl = 4'b1110; // SRL
+      else if (opcode == 7'b0110011 && funct3 == 3'b101 && funct7 == 7'b0100000) f_alu_ctl = 4'b1111; // SRA
+   end
+endfunction
+
+
+assign pc_sel     = f_pc_sel(0);
+assign pc_ld      = f_pc_ld(0);
+assign mem_sel    = f_mem_sel(0);
+assign mem_read   = (cstate == WB && opcode == 7'b0000011);
+assign mem_write  = (cstate == WB && opcode == 7'b0100011);
+assign mem_wrbits = f_mem_wrbits(0);
+assign ir_ld      = (cstate == IF);
+assign rs1_addr   = ir[19:15];
+assign rs2_addr   = ir[24:20];
+assign rd_addr    = ir[11:7];
+assign rd_sel     = f_rd_sel(0);
+assign rd_ld      = f_rd_ld(0);
+assign a_ld       = (cstate == DE);
+assign b_ld       = (cstate == DE);
+assign a_sel      = 0;
+assign b_sel      = 0;
+assign imm        = f_imm(0);
+assign alu_ctl    = f_alu_ctl(0);
+assign c_ld       = (cstate == EX);
 
 endmodule // controller
