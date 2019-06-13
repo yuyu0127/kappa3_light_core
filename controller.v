@@ -152,13 +152,12 @@ function f_rd_ld(input f);
 endfunction
 
 
-function [31:0] expand(input [11:0] in);
-   expand = { { 20{ in[11] } }, in[11:0] };
-endfunction
-
-
 function [31:0] f_imm(input f);
-   f_imm = 0;
+   f_imm = { { 20{ ir[31:31] } }, ir[31:20] };                                         // I
+   f_imm = { { 20{ ir[31:31] } }, ir[31:25], ir[11:7] };                               // S
+   f_imm = { { 19{ ir[31:31] } }, ir[31:31], ir[7:7], ir[30:25], ir[11:8] };           // B
+   f_imm = { ir[31:12], 10'b0 };                                                       // U
+   f_imm = { { 10{ ir[31:31] } }, ir[31:31], ir[19:12], ir[20:20], ir[30:21], 10'b0 }; // J
 endfunction
 
 

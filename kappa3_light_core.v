@@ -76,6 +76,7 @@ module kappa3_light_core(input            clock,
    wire [31:0]    pc_in;       // PC の書き込みデータ
    wire           pc_ld;       // PC の書き込みイネーブル信号
    wire [31:0]    pc;          // PC の値
+   assign pc_in = pc_sel ? creg : (pc + 4);
    reg32 pc_inst(.clock(clock2),
                  .reset(reset),
                  .in(pc_in),
@@ -84,7 +85,6 @@ module kappa3_light_core(input            clock,
                  .dbg_mode(dbg_mode),
                  .dbg_in(dbg_in),
                  .dbg_ld(dbg_pc_ld));
-   assign pc_in = pc_sel ? creg : (pc + 4);
    assign dbg_pc_out = pc;
 
    // IR
@@ -107,9 +107,10 @@ module kappa3_light_core(input            clock,
    wire [31:0]    mem_wrdata;
    wire [3:0]     mem_wrbits;
    wire [31:0]    mem_rddata;
+   assign mem_addr = mem_sel ? creg : pc;
    memory mem_inst(.clock(clock),
                    .address(mem_addr),
-                   .read(1'b1),
+                   .read(mem_read),
                    .write(mem_write),
                    .wrdata(mem_wrdata),
                    .wrbits(mem_wrbits),
@@ -120,6 +121,18 @@ module kappa3_light_core(input            clock,
                    .dbg_in(dbg_in),
                    .dbg_out(dbg_mem_out));
 
+   // ST_CONV
+   stconv stconv_inst(.in(breg),
+                      .ir(ir),
+                      .out(mem_wrdata));
+                      
+   // LD_CONV
+   wire [31:0]    ldconv_out;
+   ldconv ldconv_inst(.in(rddata),
+                      .ir(ir),
+                      .offset(mem_sel ? creg : pc),
+                      .out(ldconv_out));
+
    // reg-file
    wire [4:0]     rs1_addr;     // rs1 のアドレス
    wire [4:0]     rs2_addr;     // rs2 のアドレス
@@ -128,6 +141,12 @@ module kappa3_light_core(input            clock,
    wire           rd_ld;        // rd の書込みイネーブル信号
    wire [31:0]    rs1;          // rs1 の値
    wire [31:0]    rs2;          // rs2 の値
+   assign rd_in = 
+      (rd_sel == 0) ? ldconv_out : (
+      (rd_sel == 1) ? pc : (
+      (rd_sel == 2) ? creg : (
+      0
+   )));
    regfile regfile_inst(.clock(clock2),
                         .reset(reset),
                         .rs1_addr(rs1_addr),
@@ -169,15 +188,11 @@ module kappa3_light_core(input            clock,
                    .dbg_ld(dbg_b_ld));
    assign dbg_b_out = breg;
 
-   wire [31:0]    alu_in1;    // ALU の入力1
-   wire [31:0]    alu_in2;    // ALU の入力2
    wire [ 3:0]    alu_ctl;
    wire [31:0]    alu_out;    // ALU の出力
-   assign alu_in1 = (a_sel ? pc_in : areg);
-   assign alu_in2 = (b_sel ? imm : breg);
 
-   alu alu_inst(.in1(alu_in1),
-                .in2(alu_in2),
+   alu alu_inst(.in1(a_sel ? pc_in : areg),
+                .in2(b_sel ? imm : breg),
                 .ctl(alu_ctl),
                 .out(alu_out));
 

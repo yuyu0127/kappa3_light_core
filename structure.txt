@@ -1,0 +1,90 @@
+[PC(reg32)]
+in			<- case(@PC_SEL)
+				0: pc_out + 4
+				1: c_out
+ld			<- @PC_LD
+
+-> pc_out
+
+
+[ST_CONV(stconv)]
+in			<- b_out
+ir			<- @IR
+
+-> stconv_out
+
+
+[MEMORY(memory)]
+addr		<- case(@MEM_SEL)
+				0: pc_out
+				1: c_out
+wrdata		<- stconv_out
+wrbits		<- @MEM_WRBITS
+read		<- @MEM_READ
+write		<- @MEM_WRITE
+
+-> rddata
+
+
+[LD_CONV(ldconv)]
+in			<- rddata
+ir			<- @IR
+offset		<- case(@MEM_SEL)
+				0: pc_out
+				1: c_out
+
+-> ldconv_out
+
+
+[IR(reg32)]
+in			<- rddata
+ld			<- @IR_LD
+
+-> @IR_OUT
+
+
+[REG_FILE(regfile)]
+rs1_addr	<- @RS1_ARRD
+rs2_addr	<- @RS2_ARRD
+rd_addr		<- @RD_ADDR
+rd_in		<- case(@RD_SEL)
+				0: ldconv_out
+				1: pc_out
+				2: c_out
+				3: @CSR_OUT
+
+-> rs1
+-> rs2
+
+
+[A-reg(reg32)]
+in			<- rs1
+ld			<- @A_LD
+
+-> a_out = @A_OUT
+
+
+[B-reg(reg32)]
+in			<- rs2
+ld			<- @B_LD
+
+-> b_out
+
+
+[ALU(alu)]
+in1			<- case(@A_SEL)
+				0: a_out
+				1: pc_out
+in2			<- case(@B_SEL)
+				0: b_out
+				1: @IMM
+ctl			<- @ALU_CTL
+
+-> alu_out = @ALU
+
+
+[C-reg(reg32)]
+in			<- alu_out
+ld          <- @C_LD
+
+-> c_out
