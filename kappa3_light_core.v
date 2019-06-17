@@ -97,7 +97,7 @@ wire [31:0]       ir_in;      // IR の書き込みデータ
 wire              ir_ld;      // IR の書き込みイネーブル信号
 wire [31:0]       ir_out;     // IRの値
 
-assign ir_in = rddata;
+assign ir_in = mem_rddata;
 assign ir_ld = ctl_ir_ld;
 
 reg32 ir_inst(.clock(clock2),
@@ -112,7 +112,6 @@ assign dbg_ir_out = ir_out;
 
 // メモリ
 wire [31:0]       mem_addr;
-wire              mem_write;
 wire [31:0]       mem_wrdata;
 wire [3:0]        mem_wrbits;
 wire              mem_read;
@@ -169,7 +168,7 @@ regfile regfile_inst(.clock(clock2),
                      .dbg_out(dbg_reg_out));
 
 // A-reg
-wire              a_in;
+wire [31:0]       a_in;
 wire              a_ld;         // A-reg の書込みイネーブル信号
 wire [31:0]       a_out;         // A-reg の値
 
@@ -184,10 +183,11 @@ reg32 areg_inst(.clock(clock2),
                 .dbg_mode(dbg_mode),
                 .dbg_in(dbg_in),
                 .dbg_ld(dbg_a_ld));
-assign dbg_a_out = a_out;
+//assign dbg_a_out = a_out;
+assign dbg_a_out = alu_in1;
 
 // B-reg
-wire              b_in;
+wire [31:0]       b_in;
 wire              b_ld;         // B-reg の書込みイネーブル信号
 wire [31:0]       b_out;         // B-reg の値
 
@@ -196,21 +196,22 @@ assign b_ld = ctl_b_ld;
 
 reg32 breg_inst(.clock(clock2),
                 .reset(reset),
-                .in(rs2),
+                .in(b_in),
                 .ld(b_ld),
                 .out(b_out),
                 .dbg_mode(dbg_mode),
                 .dbg_in(dbg_in),
                 .dbg_ld(dbg_b_ld));
-assign dbg_b_out = b_out;
+//assign dbg_b_out = b_out;
+assign dbg_b_out = alu_in2;
 
 // ALU
 wire [31:0]       alu_in1;
 wire [31:0]       alu_in2;
 wire [31:0]       alu_out;      // ALU の出力
 
-assign alu_in1 = ctl_a_sel ? pc_out : a_out;
-assign alu_in2 = ctl_b_sel ? ctl_imm : b_out;
+assign alu_in1 = (ctl_a_sel ? pc_out : a_out);
+assign alu_in2 = (ctl_b_sel ? ctl_imm : b_out);
 
 alu alu_inst(.in1(alu_in1),
              .in2(alu_in2),
@@ -227,7 +228,7 @@ assign c_ld = ctl_c_ld;
 
 reg32 creg_inst(.clock(clock2),
                 .reset(reset),
-                .in(alu_out),
+                .in(c_in),
                 .ld(c_ld),
                 .out(c_out),
                 .dbg_mode(dbg_mode),
@@ -240,7 +241,7 @@ wire [31:0]       stconv_in;
 wire [31:0]       stconv_ir;
 wire [31:0]       stconv_out;
 assign stconv_in = b_out;
-assign stconv_ir = ctl_ir;
+assign stconv_ir = ir_out;
 
 stconv stconv_inst(.in(stconv_in),
                    .ir(stconv_ir),
@@ -252,7 +253,7 @@ wire [31:0]       ldconv_ir;
 wire [1:0]        ldconv_offset;
 wire [31:0]       ldconv_out;
 assign ldconv_in     = mem_rddata;
-assign ldconv_ir     = ctl_ir;
+assign ldconv_ir     = ir_out;
 assign ldconv_offset = ctl_mem_sel ? pc_out : c_out;
 
 ldconv ldconv_inst(.in(ldconv_in),
@@ -261,8 +262,6 @@ ldconv ldconv_inst(.in(ldconv_in),
                    .out(ldconv_out));
 
 // 制御信号
-wire [ 3:0]       cstate;
-wire [31:0]       ctl_ir;
 wire              ctl_pc_ld;
 wire              ctl_mem_sel;
 wire              ctl_mem_read;
@@ -281,12 +280,14 @@ wire              ctl_b_sel;
 wire [31:0]       ctl_imm;
 wire [ 3:0]       ctl_alu_ctl;
 wire              ctl_c_ld;
+wire [31:0]       ctl_csr_out;
+assign ctl_csr_out = 0;
 
 controller controller_inst(.cstate(cstate),
-                           .ir(ctrl_ir),
+                           .ir(ir_out),
                            .addr(mem_addr),
                            .alu_out(alu_out),
-                           .pc_sel(ctl_pc_sel),
+                           .pc_sel(pc_sel),
                            .pc_ld(ctl_pc_ld),
                            .mem_sel(ctl_mem_sel),
                            .mem_read(ctl_mem_read),
