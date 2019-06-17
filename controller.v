@@ -197,11 +197,9 @@ function [3:0] f_alu_ctl(input f);
    end
 endfunction
 
-
-assign pc_sel     = (
-                       ( cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111) ) ||
-                       ( cstate == WB && opcode == 7'b1100011 && alu_out == 32'b1 )
-                    );
+// 0: PC + 4 を用いる
+// 1: C レジスタの値を用いる
+assign pc_sel     = (cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111 || opcode == 7'b1100011) );
 assign pc_ld      = (
                        ( cstate == IF ) || 
                        ( cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111) ) || 
@@ -242,13 +240,15 @@ assign a_ld       = (cstate == DE);
 assign b_ld       = (cstate == DE);
 
 // 0:Aレジスタ  1:PC
-assign a_sel      = (
+assign a_sel      = cstate == DE ? (
                        opcode == 7'b0010111 || // AUIPC
                        opcode == 7'b1101111 || // JAL
                        opcode == 7'b1100011    // 分岐
-                    );
+                    ) : 0;
 // 0:Bレジスタ  1:imm
-assign b_sel      = ! ( opcode == 7'b0110011 && funct3 == 3'b000 );
+assign b_sel      = cstate == DE ? (
+                    !( opcode == 7'b0110011 && funct3 == 3'b000 )
+                    ): 0;
 
 // 即値
 assign imm        = f_imm(0);
