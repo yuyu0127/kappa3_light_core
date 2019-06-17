@@ -73,6 +73,56 @@ parameter B_TYPE = 3'b011;
 parameter U_TYPE = 3'b100;
 parameter J_TYPE = 3'b101;
 
+parameter OP_LUI     = 7'b0110111;
+parameter OP_AUIPC   = 7'b0010111;
+parameter OP_JAL     = 7'b1101111;
+parameter OP_JALR    = 7'b1100111;
+parameter OP_BRANCH  = 7'b1100011;
+parameter OP_BEQ     = 7'b1100011;
+parameter OP_BNE     = 7'b1100011;
+parameter OP_BLT     = 7'b1100011;
+parameter OP_BGE     = 7'b1100011;
+parameter OP_BLTU    = 7'b1100011;
+parameter OP_BGEU    = 7'b1100011;
+parameter OP_LOAD    = 7'b0000011;
+parameter OP_LB      = 7'b0000011;
+parameter OP_LH      = 7'b0000011;
+parameter OP_LW      = 7'b0000011;
+parameter OP_LBU     = 7'b0000011;
+parameter OP_LHU     = 7'b0000011;
+parameter OP_STORE   = 7'b0100011;
+parameter OP_SB      = 7'b0100011;
+parameter OP_SH      = 7'b0100011;
+parameter OP_SW      = 7'b0100011;
+parameter OP_IMMCALC = 7'b0010011;
+parameter OP_ADDI    = 7'b0010011;
+parameter OP_SLTI    = 7'b0010011;
+parameter OP_SLTIU   = 7'b0010011;
+parameter OP_XORI    = 7'b0010011;
+parameter OP_ORI     = 7'b0010011;
+parameter OP_ANDI    = 7'b0010011;
+parameter OP_SLLI    = 7'b0010011;
+parameter OP_SRLI    = 7'b0010011;
+parameter OP_SRAI    = 7'b0010011;
+parameter OP_REGCALC = 7'b0110011;
+parameter OP_ADD     = 7'b0110011;
+parameter OP_SUB     = 7'b0110011;
+parameter OP_SLL     = 7'b0110011;
+parameter OP_SLT     = 7'b0110011;
+parameter OP_SLTU    = 7'b0110011;
+parameter OP_XOR     = 7'b0110011;
+parameter OP_SRL     = 7'b0110011;
+parameter OP_SRA     = 7'b0110011;
+parameter OP_OR      = 7'b0110011;
+parameter OP_AND     = 7'b0110011;
+parameter OP_MRET    = 7'b1110011;
+parameter OP_CSRRW   = 7'b1110011;
+parameter OP_CSRRS   = 7'b1110011;
+parameter OP_CSRRC   = 7'b1110011;
+parameter OP_CSRRWI  = 7'b1110011;
+parameter OP_CSRRSI  = 7'b1110011;
+parameter OP_CSRRCI  = 7'b1110011;
+
 
 wire [6:0] opcode = ir[6:0];
 wire [2:0] funct3 = ir[14:12];
@@ -83,8 +133,8 @@ function f_pc_sel(input f);
    if ( cstate == IF )
       f_pc_sel = 0;
    else if (
-      ( cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111) ) ||
-      ( cstate == WB && opcode == 7'b1100011 && alu_out == 32'b1 )
+      ( cstate == WB && (opcode == OP_JAL || opcode == OP_JALR) ) ||
+      ( cstate == WB && opcode == OP_BRANCH && alu_out == 32'b1 )
    )
       f_pc_sel = 1;
 endfunction
@@ -114,50 +164,50 @@ endfunction
 
 
 function [3:0] get_type(input f);
-   if      (opcode == 7'b0110111                    ) get_type = U_TYPE; // lui
-   else if (opcode == 7'b0010111                    ) get_type = U_TYPE; // auipc
-   else if (opcode == 7'b1101111                    ) get_type = J_TYPE; // jal
-   else if (opcode == 7'b1100111 && funct3 == 3'b000) get_type = I_TYPE; // jalr
-   else if (opcode == 7'b1100011 && funct3 == 3'b000) get_type = B_TYPE; // beq
-   else if (opcode == 7'b1100011 && funct3 == 3'b001) get_type = B_TYPE; // bne
-   else if (opcode == 7'b1100011 && funct3 == 3'b100) get_type = B_TYPE; // blt
-   else if (opcode == 7'b1100011 && funct3 == 3'b101) get_type = B_TYPE; // bge
-   else if (opcode == 7'b1100011 && funct3 == 3'b110) get_type = B_TYPE; // bltu
-   else if (opcode == 7'b1100011 && funct3 == 3'b111) get_type = B_TYPE; // bgeu
-   else if (opcode == 7'b0000011 && funct3 == 3'b000) get_type = I_TYPE; // lb
-   else if (opcode == 7'b0000011 && funct3 == 3'b001) get_type = I_TYPE; // lh
-   else if (opcode == 7'b0000011 && funct3 == 3'b010) get_type = I_TYPE; // lw
-   else if (opcode == 7'b0000011 && funct3 == 3'b100) get_type = I_TYPE; // lbu
-   else if (opcode == 7'b0000011 && funct3 == 3'b101) get_type = I_TYPE; // lhu
-   else if (opcode == 7'b0100011 && funct3 == 3'b000) get_type = S_TYPE; // sb
-   else if (opcode == 7'b0100011 && funct3 == 3'b001) get_type = S_TYPE; // sh
-   else if (opcode == 7'b0100011 && funct3 == 3'b010) get_type = S_TYPE; // sw
-   else if (opcode == 7'b0010011 && funct3 == 3'b000) get_type = I_TYPE; // addi
-   else if (opcode == 7'b0010011 && funct3 == 3'b010) get_type = I_TYPE; // slti
-   else if (opcode == 7'b0010011 && funct3 == 3'b011) get_type = I_TYPE; // sltiu
-   else if (opcode == 7'b0010011 && funct3 == 3'b100) get_type = I_TYPE; // xori
-   else if (opcode == 7'b0010011 && funct3 == 3'b110) get_type = I_TYPE; // ori
-   else if (opcode == 7'b0010011 && funct3 == 3'b111) get_type = I_TYPE; // andi
-   else if (opcode == 7'b0010011 && funct3 == 3'b001) get_type = I_TYPE; // slli
-   else if (opcode == 7'b0010011 && funct3 == 3'b101) get_type = I_TYPE; // srli
-   else if (opcode == 7'b0010011 && funct3 == 3'b101) get_type = I_TYPE; // srai
-   else if (opcode == 7'b0110011 && funct3 == 3'b000) get_type = R_TYPE; // add
-   else if (opcode == 7'b0110011 && funct3 == 3'b000) get_type = R_TYPE; // sub
-   else if (opcode == 7'b0110011 && funct3 == 3'b001) get_type = R_TYPE; // sll
-   else if (opcode == 7'b0110011 && funct3 == 3'b010) get_type = R_TYPE; // slt
-   else if (opcode == 7'b0110011 && funct3 == 3'b011) get_type = R_TYPE; // sltu
-   else if (opcode == 7'b0110011 && funct3 == 3'b100) get_type = R_TYPE; // xor
-   else if (opcode == 7'b0110011 && funct3 == 3'b101) get_type = R_TYPE; // srl
-   else if (opcode == 7'b0110011 && funct3 == 3'b101) get_type = R_TYPE; // sra
-   else if (opcode == 7'b0110011 && funct3 == 3'b110) get_type = R_TYPE; // or
-   else if (opcode == 7'b0110011 && funct3 == 3'b111) get_type = R_TYPE; // and
-   else if (opcode == 7'b1110011 && funct3 == 3'b000) get_type = R_TYPE; // mret
-   else if (opcode == 7'b1110011 && funct3 == 3'b001) get_type = I_TYPE; // csrrw
-   else if (opcode == 7'b1110011 && funct3 == 3'b010) get_type = I_TYPE; // csrrs
-   else if (opcode == 7'b1110011 && funct3 == 3'b011) get_type = I_TYPE; // csrrc
-   else if (opcode == 7'b1110011 && funct3 == 3'b101) get_type = I_TYPE; // csrrwi
-   else if (opcode == 7'b1110011 && funct3 == 3'b110) get_type = I_TYPE; // csrrsi
-   else if (opcode == 7'b1110011 && funct3 == 3'b111) get_type = I_TYPE; // csrrci
+   if      (opcode == OP_LUI                       ) get_type = U_TYPE; // lui
+   else if (opcode == OP_AUIPC                     ) get_type = U_TYPE; // auipc
+   else if (opcode == OP_JAL                       ) get_type = J_TYPE; // jal
+   else if (opcode == OP_JALR   && funct3 == 3'b000) get_type = I_TYPE; // jalr
+   else if (opcode == OP_BEQ    && funct3 == 3'b000) get_type = B_TYPE; // beq
+   else if (opcode == OP_BNE    && funct3 == 3'b001) get_type = B_TYPE; // bne
+   else if (opcode == OP_BLT    && funct3 == 3'b100) get_type = B_TYPE; // blt
+   else if (opcode == OP_BGE    && funct3 == 3'b101) get_type = B_TYPE; // bge
+   else if (opcode == OP_BLTU   && funct3 == 3'b110) get_type = B_TYPE; // bltu
+   else if (opcode == OP_BGEU   && funct3 == 3'b111) get_type = B_TYPE; // bgeu
+   else if (opcode == OP_LB     && funct3 == 3'b000) get_type = I_TYPE; // lb
+   else if (opcode == OP_LH     && funct3 == 3'b001) get_type = I_TYPE; // lh
+   else if (opcode == OP_LW     && funct3 == 3'b010) get_type = I_TYPE; // lw
+   else if (opcode == OP_LBU    && funct3 == 3'b100) get_type = I_TYPE; // lbu
+   else if (opcode == OP_LHU    && funct3 == 3'b101) get_type = I_TYPE; // lhu
+   else if (opcode == OP_SB     && funct3 == 3'b000) get_type = S_TYPE; // sb
+   else if (opcode == OP_SH     && funct3 == 3'b001) get_type = S_TYPE; // sh
+   else if (opcode == OP_SW     && funct3 == 3'b010) get_type = S_TYPE; // sw
+   else if (opcode == OP_ADDI   && funct3 == 3'b000) get_type = I_TYPE; // addi
+   else if (opcode == OP_SLTI   && funct3 == 3'b010) get_type = I_TYPE; // slti
+   else if (opcode == OP_SLTIU  && funct3 == 3'b011) get_type = I_TYPE; // sltiu
+   else if (opcode == OP_XORI   && funct3 == 3'b100) get_type = I_TYPE; // xori
+   else if (opcode == OP_ORI    && funct3 == 3'b110) get_type = I_TYPE; // ori
+   else if (opcode == OP_ANDI   && funct3 == 3'b111) get_type = I_TYPE; // andi
+   else if (opcode == OP_SLLI   && funct3 == 3'b001) get_type = I_TYPE; // slli
+   else if (opcode == OP_SRLI   && funct3 == 3'b101) get_type = I_TYPE; // srli
+   else if (opcode == OP_SRAI   && funct3 == 3'b101) get_type = I_TYPE; // srai
+   else if (opcode == OP_ADD    && funct3 == 3'b000) get_type = R_TYPE; // add
+   else if (opcode == OP_SUB    && funct3 == 3'b000) get_type = R_TYPE; // sub
+   else if (opcode == OP_SLL    && funct3 == 3'b001) get_type = R_TYPE; // sll
+   else if (opcode == OP_SLT    && funct3 == 3'b010) get_type = R_TYPE; // slt
+   else if (opcode == OP_SLTU   && funct3 == 3'b011) get_type = R_TYPE; // sltu
+   else if (opcode == OP_XOR    && funct3 == 3'b100) get_type = R_TYPE; // xor
+   else if (opcode == OP_SRL    && funct3 == 3'b101) get_type = R_TYPE; // srl
+   else if (opcode == OP_SRA    && funct3 == 3'b101) get_type = R_TYPE; // sra
+   else if (opcode == OP_OR     && funct3 == 3'b110) get_type = R_TYPE; // or
+   else if (opcode == OP_AND    && funct3 == 3'b111) get_type = R_TYPE; // and
+   else if (opcode == OP_MRET   && funct3 == 3'b000) get_type = R_TYPE; // mret
+   else if (opcode == OP_CSRRW  && funct3 == 3'b001) get_type = I_TYPE; // csrrw
+   else if (opcode == OP_CSRRS  && funct3 == 3'b010) get_type = I_TYPE; // csrrs
+   else if (opcode == OP_CSRRC  && funct3 == 3'b011) get_type = I_TYPE; // csrrc
+   else if (opcode == OP_CSRRWI && funct3 == 3'b101) get_type = I_TYPE; // csrrwi
+   else if (opcode == OP_CSRRSI && funct3 == 3'b110) get_type = I_TYPE; // csrrsi
+   else if (opcode == OP_CSRRCI && funct3 == 3'b111) get_type = I_TYPE; // csrrci
 endfunction
 
 
@@ -175,39 +225,39 @@ endfunction
 
 function [3:0] f_alu_ctl(input f);
    if (cstate == EX) begin
-      if      (opcode == 7'b0110111                                            ) f_alu_ctl = 4'b0000; // LUI
-      else if (opcode == 7'b0110011 && funct3 == 3'b010                        ) f_alu_ctl = 4'b0011; // SLT
-      else if (opcode == 7'b0110011 && funct3 == 3'b011                        ) f_alu_ctl = 4'b0101; // SLTU
-      else if (opcode == 7'b0110011 && funct3 == 3'b000 && funct7 == 7'b0000000) f_alu_ctl = 4'b1000; // ADD
-      else if (opcode == 7'b0110011 && funct3 == 3'b000 && funct7 == 7'b0100000) f_alu_ctl = 4'b1001; // SUB
-      else if (opcode == 7'b0110011 && funct3 == 3'b100                        ) f_alu_ctl = 4'b1010; // XOR
-      else if (opcode == 7'b0110011 && funct3 == 3'b110                        ) f_alu_ctl = 4'b1011; // OR
-      else if (opcode == 7'b0110011 && funct3 == 3'b111                        ) f_alu_ctl = 4'b1100; // AND
-      else if (opcode == 7'b0110011 && funct3 == 3'b001                        ) f_alu_ctl = 4'b1101; // SLL
-      else if (opcode == 7'b0110011 && funct3 == 3'b101 && funct7 == 7'b0000000) f_alu_ctl = 4'b1110; // SRL
-      else if (opcode == 7'b0110011 && funct3 == 3'b101 && funct7 == 7'b0100000) f_alu_ctl = 4'b1111; // SRA
+      if      (opcode == OP_LUI                                                ) f_alu_ctl = 4'b0000; // LUI
+      else if (opcode == OP_REGCALC && funct3 == 3'b010                        ) f_alu_ctl = 4'b0011; // SLT
+      else if (opcode == OP_REGCALC && funct3 == 3'b011                        ) f_alu_ctl = 4'b0101; // SLTU
+      else if (opcode == OP_REGCALC && funct3 == 3'b000 && funct7 == 7'b0000000) f_alu_ctl = 4'b1000; // ADD
+      else if (opcode == OP_REGCALC && funct3 == 3'b000 && funct7 == 7'b0100000) f_alu_ctl = 4'b1001; // SUB
+      else if (opcode == OP_REGCALC && funct3 == 3'b100                        ) f_alu_ctl = 4'b1010; // XOR
+      else if (opcode == OP_REGCALC && funct3 == 3'b110                        ) f_alu_ctl = 4'b1011; // OR
+      else if (opcode == OP_REGCALC && funct3 == 3'b111                        ) f_alu_ctl = 4'b1100; // AND
+      else if (opcode == OP_REGCALC && funct3 == 3'b001                        ) f_alu_ctl = 4'b1101; // SLL
+      else if (opcode == OP_REGCALC && funct3 == 3'b101 && funct7 == 7'b0000000) f_alu_ctl = 4'b1110; // SRL
+      else if (opcode == OP_REGCALC && funct3 == 3'b101 && funct7 == 7'b0100000) f_alu_ctl = 4'b1111; // SRA
       else                                                                       f_alu_ctl = 4'b1000; // とりあえず足しとけ
    end
    else if (cstate == WB) begin
-      if      (opcode == 7'b1100011 && funct3 == 3'b000                        ) f_alu_ctl = 4'b0010; // BEQ
-      else if (opcode == 7'b1100011 && funct3 == 3'b100                        ) f_alu_ctl = 4'b0011; // BLT
-      else if (opcode == 7'b1100011 && funct3 == 3'b101                        ) f_alu_ctl = 4'b0100; // BGE
-      else if (opcode == 7'b1100011 && funct3 == 3'b110                        ) f_alu_ctl = 4'b0101; // BLTU
-      else if (opcode == 7'b1100011 && funct3 == 3'b111                        ) f_alu_ctl = 4'b0110; // BGEU
+      if      (opcode == OP_BRANCH && funct3 == 3'b000                         ) f_alu_ctl = 4'b0010; // BEQ
+      else if (opcode == OP_BRANCH && funct3 == 3'b100                         ) f_alu_ctl = 4'b0011; // BLT
+      else if (opcode == OP_BRANCH && funct3 == 3'b101                         ) f_alu_ctl = 4'b0100; // BGE
+      else if (opcode == OP_BRANCH && funct3 == 3'b110                         ) f_alu_ctl = 4'b0101; // BLTU
+      else if (opcode == OP_BRANCH && funct3 == 3'b111                         ) f_alu_ctl = 4'b0110; // BGEU
    end
 endfunction
 
 // 0: PC + 4 を用いる
 // 1: C レジスタの値を用いる
-assign pc_sel     = (cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111 || opcode == 7'b1100011) );
+assign pc_sel     = (cstate == WB && (opcode == OP_JAL || opcode == OP_JALR || opcode == OP_BRANCH) );
 assign pc_ld      = (
                        ( cstate == IF ) || 
-                       ( cstate == WB && (opcode == 7'b1101111 || opcode == 7'b1100111) ) || 
-                       ( cstate == WB && opcode == 7'b1100011 && alu_out == 32'b1 )
+                       ( cstate == WB && (opcode == OP_JAL || opcode == OP_JALR) ) || 
+                       ( cstate == WB && opcode == OP_BRANCH && alu_out == 32'b1 )
                     );
-assign mem_sel    = (cstate == WB && (opcode == 7'b0000011 || opcode == 7'b0100011));
-assign mem_read   = (cstate == WB && opcode == 7'b0000011);
-assign mem_write  = (cstate == WB && opcode == 7'b0100011);
+assign mem_sel    = (cstate == WB && (opcode == OP_LOAD || opcode == OP_STORE));
+assign mem_read   = (cstate == WB && opcode == OP_LOAD);
+assign mem_write  = (cstate == WB && opcode == OP_STORE);
 assign mem_wrbits = f_mem_wrbits(0);
 assign ir_ld      = (cstate == IF);
 assign rs1_addr   = ir[19:15];
@@ -219,20 +269,20 @@ assign rd_addr    = ir[11:7];
 // 2: C レジスタの値を用いる
 // 3: CSR の出力を用いる(KAPPA3-RV32I のみ)
 assign rd_sel     = cstate == WB ? (
-                       (opcode == 7'b0010011 || opcode == 7'b0110011 || opcode == 7'b0110111 || opcode == 7'b0010111) ? 2 :
-                       (opcode == 7'b0000011) ? 0:
-                       (opcode == 7'b1101111 || opcode == 7'b1100111) ? 1:
+                       (opcode == OP_IMMCALC || opcode == OP_REGCALC || opcode == OP_LUI || opcode == OP_AUIPC) ? 2 :
+                       (opcode == OP_LOAD) ? 0:
+                       (opcode == OP_JAL || opcode == OP_JALR) ? 1:
                     0) : 0;
 
 // レジスタ書き込み
 assign rd_ld      = (cstate == WB && (
-                       opcode == 7'b0010011 || // 演算
-                       opcode == 7'b0110011 || // 演算
-                       opcode == 7'b0110111 || // LUI
-                       opcode == 7'b0010111 || // AUIPC
-                       opcode == 7'b0000011 || // Load
-                       opcode == 7'b1101111 || // JAL
-                       opcode == 7'b1100111    // JALR
+                       opcode == OP_IMMCALC || // 演算
+                       opcode == OP_REGCALC || // 演算
+                       opcode == OP_LUI || // LUI
+                       opcode == OP_AUIPC || // AUIPC
+                       opcode == OP_LOAD || // Load
+                       opcode == OP_JAL || // JAL
+                       opcode == OP_JALR    // JALR
                     ));
 
 // A,B書き込み
@@ -241,13 +291,13 @@ assign b_ld       = (cstate == DE);
 
 // 0:Aレジスタ  1:PC
 assign a_sel      = cstate == DE ? (
-                       opcode == 7'b0010111 || // AUIPC
-                       opcode == 7'b1101111 || // JAL
-                       opcode == 7'b1100011    // 分岐
+                       opcode == OP_AUIPC || // AUIPC
+                       opcode == OP_JAL || // JAL
+                       opcode == OP_BRANCH    // 分岐
                     ) : 0;
 // 0:Bレジスタ  1:imm
 assign b_sel      = cstate == DE ? (
-                    !( opcode == 7'b0110011 && funct3 == 3'b000 )
+                    !( opcode == OP_REGCALC && funct3 == 3'b000 )
                     ): 0;
 
 // 即値
