@@ -14,7 +14,7 @@ ir			<- @IR
 -> stconv_out
 
 
-[MEMORY(memory)]
+o[MEMORY(memory)]
 addr		<- case(@MEM_SEL)
 				0: pc_out
 				1: c_out
@@ -43,7 +43,7 @@ ld			<- @IR_LD
 -> @IR_OUT
 
 
-[REG_FILE(regfile)]
+o[REG_FILE(regfile)]
 rs1_addr	<- @RS1_ARRD
 rs2_addr	<- @RS2_ARRD
 rd_addr		<- @RD_ADDR
@@ -52,26 +52,27 @@ rd_in		<- case(@RD_SEL)
 				1: pc_out
 				2: c_out
 				3: @CSR_OUT
+rd_ld		<- @RD_LD
 
 -> rs1
 -> rs2
 
 
-[A-reg(reg32)]
+o[A-reg(reg32)]
 in			<- rs1
 ld			<- @A_LD
 
 -> a_out = @A_OUT
 
 
-[B-reg(reg32)]
+o[B-reg(reg32)]
 in			<- rs2
 ld			<- @B_LD
 
 -> b_out
 
 
-[ALU(alu)]
+o[ALU(alu)]
 in1			<- case(@A_SEL)
 				0: a_out
 				1: pc_out
@@ -83,7 +84,7 @@ ctl			<- @ALU_CTL
 -> alu_out = @ALU
 
 
-[C-reg(reg32)]
+o[C-reg(reg32)]
 in			<- alu_out
 ld          <- @C_LD
 
