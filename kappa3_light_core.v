@@ -78,7 +78,7 @@ wire                 pc_ld;      // PC の書き込みイネーブル信号
 wire [31:0]          pc_out;     // PC の出力
 wire                 pc_sel;
 
-assign pc_in = pc_sel ? c_out : pc_out;
+assign pc_in = pc_sel ? c_out : pc_out + 4;
 assign pc_ld = ctl_pc_ld;
 
 reg32 pc_inst(.clock(clock2),
