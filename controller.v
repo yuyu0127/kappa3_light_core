@@ -116,6 +116,7 @@ parameter OP_SRA     = 7'b0110011;
 parameter OP_OR      = 7'b0110011;
 parameter OP_AND     = 7'b0110011;
 parameter OP_MRET    = 7'b1110011;
+parameter OP_CSR     = 7'b1110011;
 parameter OP_CSRRW   = 7'b1110011;
 parameter OP_CSRRS   = 7'b1110011;
 parameter OP_CSRRC   = 7'b1110011;
@@ -153,50 +154,17 @@ endfunction
 
 
 function [3:0] get_type(input f);
-   if      (opcode == OP_LUI                       ) get_type = U_TYPE; // lui
-   else if (opcode == OP_AUIPC                     ) get_type = U_TYPE; // auipc
-   else if (opcode == OP_JAL                       ) get_type = J_TYPE; // jal
-   else if (opcode == OP_JALR   && funct3 == 3'b000) get_type = I_TYPE; // jalr
-   else if (opcode == OP_BEQ    && funct3 == 3'b000) get_type = B_TYPE; // beq
-   else if (opcode == OP_BNE    && funct3 == 3'b001) get_type = B_TYPE; // bne
-   else if (opcode == OP_BLT    && funct3 == 3'b100) get_type = B_TYPE; // blt
-   else if (opcode == OP_BGE    && funct3 == 3'b101) get_type = B_TYPE; // bge
-   else if (opcode == OP_BLTU   && funct3 == 3'b110) get_type = B_TYPE; // bltu
-   else if (opcode == OP_BGEU   && funct3 == 3'b111) get_type = B_TYPE; // bgeu
-   else if (opcode == OP_LB     && funct3 == 3'b000) get_type = I_TYPE; // lb
-   else if (opcode == OP_LH     && funct3 == 3'b001) get_type = I_TYPE; // lh
-   else if (opcode == OP_LW     && funct3 == 3'b010) get_type = I_TYPE; // lw
-   else if (opcode == OP_LBU    && funct3 == 3'b100) get_type = I_TYPE; // lbu
-   else if (opcode == OP_LHU    && funct3 == 3'b101) get_type = I_TYPE; // lhu
-   else if (opcode == OP_SB     && funct3 == 3'b000) get_type = S_TYPE; // sb
-   else if (opcode == OP_SH     && funct3 == 3'b001) get_type = S_TYPE; // sh
-   else if (opcode == OP_SW     && funct3 == 3'b010) get_type = S_TYPE; // sw
-   else if (opcode == OP_ADDI   && funct3 == 3'b000) get_type = I_TYPE; // addi
-   else if (opcode == OP_SLTI   && funct3 == 3'b010) get_type = I_TYPE; // slti
-   else if (opcode == OP_SLTIU  && funct3 == 3'b011) get_type = I_TYPE; // sltiu
-   else if (opcode == OP_XORI   && funct3 == 3'b100) get_type = I_TYPE; // xori
-   else if (opcode == OP_ORI    && funct3 == 3'b110) get_type = I_TYPE; // ori
-   else if (opcode == OP_ANDI   && funct3 == 3'b111) get_type = I_TYPE; // andi
-   else if (opcode == OP_SLLI   && funct3 == 3'b001) get_type = I_TYPE; // slli
-   else if (opcode == OP_SRLI   && funct3 == 3'b101) get_type = I_TYPE; // srli
-   else if (opcode == OP_SRAI   && funct3 == 3'b101) get_type = I_TYPE; // srai
-   else if (opcode == OP_ADD    && funct3 == 3'b000) get_type = R_TYPE; // add
-   else if (opcode == OP_SUB    && funct3 == 3'b000) get_type = R_TYPE; // sub
-   else if (opcode == OP_SLL    && funct3 == 3'b001) get_type = R_TYPE; // sll
-   else if (opcode == OP_SLT    && funct3 == 3'b010) get_type = R_TYPE; // slt
-   else if (opcode == OP_SLTU   && funct3 == 3'b011) get_type = R_TYPE; // sltu
-   else if (opcode == OP_XOR    && funct3 == 3'b100) get_type = R_TYPE; // xor
-   else if (opcode == OP_SRL    && funct3 == 3'b101) get_type = R_TYPE; // srl
-   else if (opcode == OP_SRA    && funct3 == 3'b101) get_type = R_TYPE; // sra
-   else if (opcode == OP_OR     && funct3 == 3'b110) get_type = R_TYPE; // or
-   else if (opcode == OP_AND    && funct3 == 3'b111) get_type = R_TYPE; // and
-   else if (opcode == OP_MRET   && funct3 == 3'b000) get_type = R_TYPE; // mret
-   else if (opcode == OP_CSRRW  && funct3 == 3'b001) get_type = I_TYPE; // csrrw
-   else if (opcode == OP_CSRRS  && funct3 == 3'b010) get_type = I_TYPE; // csrrs
-   else if (opcode == OP_CSRRC  && funct3 == 3'b011) get_type = I_TYPE; // csrrc
-   else if (opcode == OP_CSRRWI && funct3 == 3'b101) get_type = I_TYPE; // csrrwi
-   else if (opcode == OP_CSRRSI && funct3 == 3'b110) get_type = I_TYPE; // csrrsi
-   else if (opcode == OP_CSRRCI && funct3 == 3'b111) get_type = I_TYPE; // csrrci
+   if      (opcode == OP_LUI                        ) get_type = U_TYPE; // lui
+   else if (opcode == OP_AUIPC                      ) get_type = U_TYPE; // auipc
+   else if (opcode == OP_JAL                        ) get_type = J_TYPE; // jal
+   else if (opcode == OP_JALR    && funct3 == 3'b000) get_type = I_TYPE; // jalr
+   else if (opcode == OP_BRANCH  && funct3 == 3'b111) get_type = B_TYPE; // 分岐
+   else if (opcode == OP_LOAD    && funct3 == 3'b000) get_type = I_TYPE; // Load
+   else if (opcode == OP_STORE   && funct3 == 3'b000) get_type = S_TYPE; // Store
+   else if (opcode == OP_IMMCALC && funct3 == 3'b101) get_type = I_TYPE; // 即値演算
+   else if (opcode == OP_REGCALC && funct3 == 3'b111) get_type = R_TYPE; // レジスタ演算
+   else if (opcode == OP_MRET    && funct3 == 3'b000) get_type = R_TYPE; // mret
+   else if (opcode == OP_CSR     && funct3 != 3'b000) get_type = I_TYPE; // csr
 endfunction
 
 
