@@ -129,35 +129,24 @@ wire [2:0] funct3 = ir[14:12];
 wire [6:0] funct7 = ir[31:25];
 
 
-function f_pc_sel(input f);
-   if ( cstate == IF )
-      f_pc_sel = 0;
-   else if (
-      ( cstate == WB && (opcode == OP_JAL || opcode == OP_JALR) ) ||
-      ( cstate == WB && opcode == OP_BRANCH && alu_out == 32'b1 )
-   )
-      f_pc_sel = 1;
-endfunction
-
-
-function [3:0] f_mem_wrbits(input f);
+function [3:0] get_mem_wrbits(input f);
    case (ir[14:12])
       000: begin // SB
          case (addr[1:0])
-            2'b00: f_mem_wrbits = 4'b0001;
-            2'b01: f_mem_wrbits = 4'b0010;
-            2'b10: f_mem_wrbits = 4'b0100;
-            2'b11: f_mem_wrbits = 4'b1000;
+            2'b00: get_mem_wrbits = 4'b0001;
+            2'b01: get_mem_wrbits = 4'b0010;
+            2'b10: get_mem_wrbits = 4'b0100;
+            2'b11: get_mem_wrbits = 4'b1000;
          endcase
       end
       001: begin // SH
          case (addr[1])
-            1'b0: f_mem_wrbits = 4'b0011;
-            1'b1: f_mem_wrbits = 4'b1100; 
+            1'b0: get_mem_wrbits = 4'b0011;
+            1'b1: get_mem_wrbits = 4'b1100; 
          endcase
       end
       default: begin // SWその他
-         f_mem_wrbits = 4'b1111;
+         get_mem_wrbits = 4'b1111;
       end
    endcase
 endfunction
@@ -211,39 +200,54 @@ function [3:0] get_type(input f);
 endfunction
 
 
-function [31:0] f_imm(input f);
+function [31:0] get_imm(input f);
    case(get_type(0))
-      I_TYPE:  f_imm = { { 20{ ir[31:31] } }, ir[31:20] };                                         // I
-      S_TYPE:  f_imm = { { 20{ ir[31:31] } }, ir[31:25], ir[11:7] };                               // S
-      B_TYPE:  f_imm = { { 19{ ir[31:31] } }, ir[31:31], ir[7:7], ir[30:25], ir[11:8] };           // B
-      U_TYPE:  f_imm = { ir[31:12], 12'b0 };                                                       // U
-      J_TYPE:  f_imm = { { 10{ ir[31:31] } }, ir[31:31], ir[19:12], ir[20:20], ir[30:21], 10'b0 }; // J
-      default: f_imm = 0;
+      I_TYPE:  get_imm = { { 20{ ir[31:31] } }, ir[31:20] };                                         // I
+      S_TYPE:  get_imm = { { 20{ ir[31:31] } }, ir[31:25], ir[11:7] };                               // S
+      B_TYPE:  get_imm = { { 19{ ir[31:31] } }, ir[31:31], ir[7:7], ir[30:25], ir[11:8] };           // B
+      U_TYPE:  get_imm = { ir[31:12], 12'b0 };                                                       // U
+      J_TYPE:  get_imm = { { 10{ ir[31:31] } }, ir[31:31], ir[19:12], ir[20:20], ir[30:21], 10'b0 }; // J
+      default: get_imm = 0;
    endcase
 endfunction
 
 
-function [3:0] f_alu_ctl(input f);
-   if (cstate == EX) begin
-      if      (opcode == OP_LUI                                                ) f_alu_ctl = 4'b0000; // LUI
-      else if (opcode == OP_REGCALC && funct3 == 3'b010                        ) f_alu_ctl = 4'b0011; // SLT
-      else if (opcode == OP_REGCALC && funct3 == 3'b011                        ) f_alu_ctl = 4'b0101; // SLTU
-      else if (opcode == OP_REGCALC && funct3 == 3'b000 && funct7 == 7'b0000000) f_alu_ctl = 4'b1000; // ADD
-      else if (opcode == OP_REGCALC && funct3 == 3'b000 && funct7 == 7'b0100000) f_alu_ctl = 4'b1001; // SUB
-      else if (opcode == OP_REGCALC && funct3 == 3'b100                        ) f_alu_ctl = 4'b1010; // XOR
-      else if (opcode == OP_REGCALC && funct3 == 3'b110                        ) f_alu_ctl = 4'b1011; // OR
-      else if (opcode == OP_REGCALC && funct3 == 3'b111                        ) f_alu_ctl = 4'b1100; // AND
-      else if (opcode == OP_REGCALC && funct3 == 3'b001                        ) f_alu_ctl = 4'b1101; // SLL
-      else if (opcode == OP_REGCALC && funct3 == 3'b101 && funct7 == 7'b0000000) f_alu_ctl = 4'b1110; // SRL
-      else if (opcode == OP_REGCALC && funct3 == 3'b101 && funct7 == 7'b0100000) f_alu_ctl = 4'b1111; // SRA
-      else                                                                       f_alu_ctl = 4'b1000; // とりあえず足しとけ
-   end
-   else if (cstate == WB) begin
-      if      (opcode == OP_BRANCH && funct3 == 3'b000                         ) f_alu_ctl = 4'b0010; // BEQ
-      else if (opcode == OP_BRANCH && funct3 == 3'b100                         ) f_alu_ctl = 4'b0011; // BLT
-      else if (opcode == OP_BRANCH && funct3 == 3'b101                         ) f_alu_ctl = 4'b0100; // BGE
-      else if (opcode == OP_BRANCH && funct3 == 3'b110                         ) f_alu_ctl = 4'b0101; // BLTU
-      else if (opcode == OP_BRANCH && funct3 == 3'b111                         ) f_alu_ctl = 4'b0110; // BGEU
+function [3:0] get_alu_ctl(input f);
+   if ( cstate == EX ) begin
+      if      ( opcode == OP_LUI                                                 ) get_alu_ctl = 4'b0000; // LUI
+      else if ( opcode == OP_REGCALC && funct3 == 3'b010                         ) get_alu_ctl = 4'b0011; // レジスタ演算 SLT
+      else if ( opcode == OP_REGCALC && funct3 == 3'b011                         ) get_alu_ctl = 4'b0101; // レジスタ演算 SLTU
+      else if ( opcode == OP_REGCALC && funct3 == 3'b000 && funct7 == 7'b0000000 ) get_alu_ctl = 4'b1000; // レジスタ演算 ADD
+      else if ( opcode == OP_REGCALC && funct3 == 3'b000 && funct7 == 7'b0100000 ) get_alu_ctl = 4'b1001; // レジスタ演算 SUB
+      else if ( opcode == OP_REGCALC && funct3 == 3'b100                         ) get_alu_ctl = 4'b1010; // レジスタ演算 XOR
+      else if ( opcode == OP_REGCALC && funct3 == 3'b110                         ) get_alu_ctl = 4'b1011; // レジスタ演算 OR
+      else if ( opcode == OP_REGCALC && funct3 == 3'b111                         ) get_alu_ctl = 4'b1100; // レジスタ演算 AND
+      else if ( opcode == OP_REGCALC && funct3 == 3'b001                         ) get_alu_ctl = 4'b1101; // レジスタ演算 SLL
+      else if ( opcode == OP_REGCALC && funct3 == 3'b101 && funct7 == 7'b0000000 ) get_alu_ctl = 4'b1110; // レジスタ演算 SRL
+      else if ( opcode == OP_REGCALC && funct3 == 3'b101 && funct7 == 7'b0100000 ) get_alu_ctl = 4'b1111; // レジスタ演算 SRA
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b010                         ) get_alu_ctl = 4'b0011; // 即値演算     SLTI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b011                         ) get_alu_ctl = 4'b0101; // 即値演算     SLTIU
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b000                         ) get_alu_ctl = 4'b1000; // 即値演算     ADDI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b100                         ) get_alu_ctl = 4'b1010; // 即値演算     XORI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b110                         ) get_alu_ctl = 4'b1011; // 即値演算     ORI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b111                         ) get_alu_ctl = 4'b1100; // 即値演算     ANDI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b001                         ) get_alu_ctl = 4'b1101; // 即値演算     SLLI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b101 && funct7 == 7'b0000000 ) get_alu_ctl = 4'b1110; // 即値演算     SRLI
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b101 && funct7 == 7'b0100000 ) get_alu_ctl = 4'b1111; // 即値演算     SRAI
+      else                                                                         get_alu_ctl = 4'b1000; // それ以外は足しとく
+   end 
+   else begin // WBの条件判定用
+      if      ( opcode == OP_BRANCH  && funct3 == 3'b000                          ) get_alu_ctl = 4'b0010; // BEQ
+      else if ( opcode == OP_BRANCH  && funct3 == 3'b001                          ) get_alu_ctl = 4'b0011; // BNE
+      else if ( opcode == OP_BRANCH  && funct3 == 3'b100                          ) get_alu_ctl = 4'b0100; // BLT
+      else if ( opcode == OP_REGCALC && funct3 == 3'b010                          ) get_alu_ctl = 4'b0100; // SLT
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b010                          ) get_alu_ctl = 4'b0100; // SLTI
+      else if ( opcode == OP_BRANCH  && funct3 == 3'b101                          ) get_alu_ctl = 4'b0101; // BGE
+      else if ( opcode == OP_BRANCH  && funct3 == 3'b110                          ) get_alu_ctl = 4'b0110; // BLTU
+      else if ( opcode == OP_REGCALC && funct3 == 3'b011                          ) get_alu_ctl = 4'b0110; // SLTU
+      else if ( opcode == OP_IMMCALC && funct3 == 3'b011                          ) get_alu_ctl = 4'b0110; // SLTIU
+      else if ( opcode == OP_BRANCH  && funct3 == 3'b111                          ) get_alu_ctl = 4'b0111; // BGEU
+      else                                                                          get_alu_ctl = 4'b1000; // それ以外は足しとく
    end
 endfunction
 
@@ -258,7 +262,7 @@ assign pc_ld      = (
 assign mem_sel    = (cstate == WB && (opcode == OP_LOAD || opcode == OP_STORE));
 assign mem_read   = (cstate == WB && opcode == OP_LOAD);
 assign mem_write  = (cstate == WB && opcode == OP_STORE);
-assign mem_wrbits = f_mem_wrbits(0);
+assign mem_wrbits = get_mem_wrbits(0);
 assign ir_ld      = (cstate == IF);
 assign rs1_addr   = ir[19:15];
 assign rs2_addr   = ir[24:20];
@@ -268,21 +272,21 @@ assign rd_addr    = ir[11:7];
 // 1: PC レジスタの値を用いる
 // 2: C レジスタの値を用いる
 // 3: CSR の出力を用いる(KAPPA3-RV32I のみ)
-assign rd_sel     = cstate == WB ? (
-                       (opcode == OP_IMMCALC || opcode == OP_REGCALC || opcode == OP_LUI || opcode == OP_AUIPC) ? 2 :
-                       (opcode == OP_LOAD) ? 0:
-                       (opcode == OP_JAL || opcode == OP_JALR) ? 1:
-                    0) : 0;
+assign rd_sel     = (
+                       (opcode == OP_LOAD                                                                     ) ? 0: // mem
+                       (opcode == OP_JAL     || opcode == OP_JALR                                             ) ? 1: // PC
+                       (opcode == OP_IMMCALC || opcode == OP_REGCALC || opcode == OP_LUI || opcode == OP_AUIPC) ? 2: // C
+                    3);                                                                                              // その他
 
 // レジスタ書き込み
 assign rd_ld      = (cstate == WB && (
-                       opcode == OP_IMMCALC || // 演算
-                       opcode == OP_REGCALC || // 演算
-                       opcode == OP_LUI || // LUI
-                       opcode == OP_AUIPC || // AUIPC
-                       opcode == OP_LOAD || // Load
-                       opcode == OP_JAL || // JAL
-                       opcode == OP_JALR    // JALR
+                       opcode == OP_IMMCALC || // 即値演算
+                       opcode == OP_REGCALC || // レジスタ演算
+                       opcode == OP_LUI     || // LUI
+                       opcode == OP_AUIPC   || // AUIPC
+                       opcode == OP_LOAD    || // Load
+                       opcode == OP_JAL     || // JAL
+                       opcode == OP_JALR       // JALR
                     ));
 
 // A,B書き込み
@@ -290,20 +294,17 @@ assign a_ld       = (cstate == DE);
 assign b_ld       = (cstate == DE);
 
 // 0:Aレジスタ  1:PC
-assign a_sel      = cstate == DE ? (
-                       opcode == OP_AUIPC || // AUIPC
-                       opcode == OP_JAL || // JAL
-                       opcode == OP_BRANCH    // 分岐
-                    ) : 0;
+assign a_sel      = (opcode == OP_AUIPC  || // AUIPC
+                     opcode == OP_JAL    || // JAL
+                     opcode == OP_BRANCH);    // 分岐
+
 // 0:Bレジスタ  1:imm
-assign b_sel      = cstate == DE ? (
-                    !( opcode == OP_REGCALC && funct3 == 3'b000 )
-                    ): 0;
+assign b_sel      = (opcode != OP_REGCALC);
 
 // 即値
-assign imm        = f_imm(0);
+assign imm        = get_imm(0);
 // ALU_CTL
-assign alu_ctl    = f_alu_ctl(0);
+assign alu_ctl    = get_alu_ctl(0);
 // C書き込み
 assign c_ld       = (cstate == EX);
 
