@@ -109,6 +109,7 @@ module kappa3_light(input        sys_clock,
                               .sel_x(sel_x),
                               .seg_y(seg_y),
                               .sel_y(sel_y));
+	
 
    // clock の2倍のクロック
    reg      clock2;
@@ -256,7 +257,8 @@ module kappa3_light(input        sys_clock,
                                       .dbg_mem_addr(mem_addr),
                                       .dbg_mem_read(mem_read),
                                       .dbg_mem_write(mem_write),
-                                      .dbg_mem_out(mem_rddata));
+                                      .dbg_mem_out(mem_rddata),
+												  .dbg_seg7_dot64(seg7_dot64));
 
    // デバッガ
    debugger dbg_inst(.sys_clock(sys_clock),

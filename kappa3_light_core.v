@@ -66,7 +66,8 @@ module kappa3_light_core(input            clock,
                          output [31:0]    dbg_a_out,
                          output [31:0]    dbg_b_out,
                          output [31:0]    dbg_c_out,
-                         output [31:0]    dbg_mem_out);
+                         output [31:0]    dbg_mem_out,
+                         output [63:0]    dbg_seg7_dot64);
 
 // デバッグモードの信号
 wire     dbg_mode;
@@ -183,8 +184,8 @@ reg32 areg_inst(.clock(clock2),
                 .dbg_mode(dbg_mode),
                 .dbg_in(dbg_in),
                 .dbg_ld(dbg_a_ld));
-//assign dbg_a_out = a_out;
-assign dbg_a_out = alu_in1;
+assign dbg_a_out = a_out;
+//assign dbg_a_out = alu_in1;
 
 // B-reg
 wire [31:0]       b_in;
@@ -202,8 +203,8 @@ reg32 breg_inst(.clock(clock2),
                 .dbg_mode(dbg_mode),
                 .dbg_in(dbg_in),
                 .dbg_ld(dbg_b_ld));
-//assign dbg_b_out = b_out;
-assign dbg_b_out = alu_in2;
+assign dbg_b_out = b_out;
+//assign dbg_b_out = alu_in2;
 
 // ALU
 wire [31:0]       alu_in1;
@@ -306,6 +307,26 @@ controller controller_inst(.cstate(cstate),
                            .imm(ctl_imm),
                            .alu_ctl(ctl_alu_ctl),
                            .c_ld(ctl_c_ld));
+									
+controller_debugger ctl_dbg_inst(pc_sel,
+                                 ctl_pc_ld,
+                                 ctl_mem_sel,
+                                 ctl_mem_read,
+                                 ctl_mem_write,
+                                 ctl_mem_wrbits,
+                                 ctl_ir_ld,
+                                 ctl_rs1_addr,
+                                 ctl_rs2_addr,
+                                 ctl_rd_addr,
+                                 ctl_rd_sel,
+                                 ctl_rd_ld,
+                                 ctl_a_ld,
+                                 ctl_b_ld,
+                                 ctl_a_sel,
+                                 ctl_b_sel,
+                                 ctl_alu_ctl,
+                                 ctl_c_ld,
+                                 dbg_seg7_dot64);
 
 // running は実際には phasegen の出力を用いる．
 phasegen phasegen_inst(.clock(clock2),
