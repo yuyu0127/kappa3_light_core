@@ -33,9 +33,10 @@ function [31:0] converter;
    input [31:0] ir;
 
    case (ir[14:12])
-      000: converter = {4{in[7:0]}};  // SB
-      001: converter = {2{in[15:0]}}; // SH
-      010: converter = in[31:0];      // SW 
+      3'b000:  converter = {4{in[7:0]}};  // SB
+      3'b001:  converter = {2{in[15:0]}}; // SH
+      3'b010:  converter = in[31:0];      // SW 
+      default: converter = in[31:0];      // SW 
    endcase
    
 endfunction

@@ -92,7 +92,7 @@ wire [6:0] funct7 = ir[31:25];
 
 function [3:0] get_mem_wrbits(input f);
    case (ir[14:12])
-      000: begin // SB
+      3'b000: begin // SB
          case (addr[1:0])
             2'b00: get_mem_wrbits = 4'b0001;
             2'b01: get_mem_wrbits = 4'b0010;
@@ -100,8 +100,8 @@ function [3:0] get_mem_wrbits(input f);
             2'b11: get_mem_wrbits = 4'b1000;
          endcase
       end
-      001: begin // SH
-         case (addr[1])
+      3'b001: begin // SH
+         case (addr[1:1])
             1'b0: get_mem_wrbits = 4'b0011;
             1'b1: get_mem_wrbits = 4'b1100; 
          endcase

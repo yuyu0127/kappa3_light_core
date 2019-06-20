@@ -255,7 +255,7 @@ wire [1:0]        ldconv_offset;
 wire [31:0]       ldconv_out;
 assign ldconv_in     = mem_rddata;
 assign ldconv_ir     = ir_out;
-assign ldconv_offset = ctl_mem_sel ? pc_out : c_out;
+assign ldconv_offset = mem_addr[1:0];
 
 ldconv ldconv_inst(.in(ldconv_in),
                    .ir(ldconv_ir),

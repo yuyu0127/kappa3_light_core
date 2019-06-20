@@ -39,12 +39,13 @@ function [31:0] converter;
    input [1:0]  offset;
    
    case (ir[14:12])
-      000: converter = { { 24{ in[(offset<<3)+ 7] } }, in[(offset<<3)+ 7-: 8] }; // LB
-      100: converter = {   24'b0                     , in[(offset<<3)+ 7-: 8] }; // LBU
-      001: converter = { { 16{ in[(offset<<4)+15] } }, in[(offset<<4)+15-:16] }; // LH
-      101: converter = {   16'b0                     , in[(offset<<4)+15-:16] }; // LHU
-      010: converter = in[31:0];                                                 // LW
-   endcase
+      3'b000:  converter = { { 24{ in[(offset<<3)+ 7] } }, in[(offset<<3)+ 7-: 8] }; // LB
+      3'b100:  converter = {   24'b0                     , in[(offset<<3)+ 7-: 8] }; // LBU
+      3'b001:  converter = { { 16{ in[(offset<<4)+15] } }, in[(offset<<4)+15-:16] }; // LH
+      3'b101:  converter = {   16'b0                     , in[(offset<<4)+15-:16] }; // LHU
+      3'b010:  converter = in[31:0];                                                 // LW
+		default: converter = in[31:0];
+	endcase
 
 endfunction
 
